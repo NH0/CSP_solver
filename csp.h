@@ -49,6 +49,7 @@ private :
 
 class reine : public csp{
     reine();
+public :
     reine(int n);
 };
 
