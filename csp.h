@@ -21,13 +21,15 @@ struct comparaison{
 struct contrainte{
     // coef1 * var1 ope coef2 * var2 comp valeur
     double coef1;
+    int var1; // indice de la variable 1
     double coef2;
+    int var2; // indice de la variable 2
     operation ope;
     comparaison comp;
     double valeur;
     contrainte(){coef1 = 0, coef2 = 0; ope = operation(); comp = comparaison(); valeur = 0;} // constructeur par défaut
-    contrainte(double c1, string o, double c2, string c, double v); // attention on utilise des string
-    bool satisfied(int a, int b); // verification de la satisfaction de la contrainte pour des valeurs particulières
+    contrainte(double c1, int i1, string o, double c2, int i2, string c, double v); // attention on utilise des string
+    bool satisfaite(int v1, int v2);
 };
 
 class csp{
@@ -43,5 +45,10 @@ private :
 //    backtrack
 //    AC
 
+};
+
+class reine : public csp{
+    reine();
+    reine(int n);
 };
 
