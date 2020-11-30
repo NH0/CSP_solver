@@ -1,5 +1,15 @@
+# Ignore local configuration
 .vscode
 
+# Ignore executables
 *.o
 *.exe
+
+# Ignore data files
 *.col
+*.col.b
+*.dat
+
+# Ignore builds and cache
+build
+.cache
