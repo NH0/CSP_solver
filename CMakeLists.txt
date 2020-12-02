@@ -4,5 +4,6 @@ project(CSP_solver LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Debug)
 
-add_executable(CSP_solver main.cpp csp.h csp.cpp)
+add_executable(CSP_solver main.cpp csp.h csp.cpp coloration.h coloration.cpp)
