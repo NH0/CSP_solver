@@ -36,8 +36,8 @@ class CSP{
 public :
     int nb_var;
     vector<vector <int>> domaines; // les domaines énumérés
-    vector<contrainte> contraintes;
-    csp(){nb_var = 0; domaines={}; contraintes = {contrainte()};} // constructeur par défaut
+    vector<Contrainte> contraintes;
+    CSP(){nb_var = 0; domaines={}; contraintes = {};} // constructeur par défaut
 //    vector<int> solve();
 
 private :
