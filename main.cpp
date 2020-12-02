@@ -1,10 +1,12 @@
 #include <iostream>
 #include "csp.h"
+#include "coloration.h"
+
 using namespace std;
 
 int main()
 {
-    reine r5 = reine(5);
+    Reine r5 = Reine(5);
     cout << "Nombre de domaines :" << r5.domaines.size() << endl;
     for (int i = 0; i< r5.domaines.size(); i++){
         cout << "Domaine "<< i << " : " ;
