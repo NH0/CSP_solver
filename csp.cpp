@@ -1,6 +1,7 @@
 #include "csp.h"
+#include <stdexcept>
 
-double operation::apply(double a, double b){
+double Operation::apply(double a, double b){
     if (op == "+"){
         return a+b;
     }
@@ -13,9 +14,12 @@ double operation::apply(double a, double b){
     if (op == "/"){
         return a/b;
     }
+    else {
+        throw std::invalid_argument(op);
+    }
 }
 
-bool comparaison::apply(double a, double b){
+bool Comparaison::apply(double a, double b){
     if (comp == "="){
         return a==b;
     }
@@ -34,30 +38,33 @@ bool comparaison::apply(double a, double b){
     if (comp == ">"){
         return a > b;
     }
+    else {
+        throw std::invalid_argument(comp);
+    }
 }
 
-contrainte::contrainte(double c1, int i1, string o, double c2, int i2, string c, double v){
+Contrainte::Contrainte(double c1, int i1, string o, double c2, int i2, string c, double v){
     coef1 = c1;
     var1 = i1;
     coef2 = c2;
     var2 = i2;
-    ope = operation(o);
-    comp = comparaison(c);
+    ope = Operation(o);
+    comp = Comparaison(c);
     valeur = v;
 }
 
-bool contrainte::satisfaite(int v1, int v2){
+bool Contrainte::satisfaite(int v1, int v2){
     return(comp.apply(ope.apply(v1*coef1,v2*coef2),valeur));
 }
 
-reine::reine(int n){
+Reine::Reine(int n){
     nb_var = n;
     for (int i = 0; i<n; i++){
         vector<int> dom;
         for (int j = 0; j<n ;j++){
             dom.push_back(j);
             if (i<j){
-                contrainte c = contrainte(1,i,"-",1,j,"!=",0);
+                Contrainte c = Contrainte(1,i,"-",1,j,"!=",0);
                 contraintes.push_back(c);
             }
         }

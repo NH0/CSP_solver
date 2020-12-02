@@ -1,5 +1,7 @@
 # Ignore local configuration
 .vscode
+launch.json
+*.user
 
 # Ignore executables
 *.o
