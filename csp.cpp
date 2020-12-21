@@ -60,14 +60,17 @@ bool Contrainte::satisfaite(int v1, int v2){
 Reine::Reine(int n){
     nb_var = n;
     for (int i = 0; i<n; i++){
-        vector<int> dom;
+        vector<int> domaine_i;
         for (int j = 0; j<n ;j++){
-            dom.push_back(j);
+            domaine_i.push_back(j);
             if (i<j){
                 Contrainte c = Contrainte(1,i,"-",1,j,"!=",0);
                 contraintes.push_back(c);
+                contraintes_par_var[i].push_back(contraintes.size() - 1);
+                contraintes_par_var[j].push_back(contraintes.size() - 1);
             }
         }
-        domaines.push_back(dom);
+        domaines.push_back(domaine_i);
     }
+    arbre = Arbre_dom(domaines);
 }

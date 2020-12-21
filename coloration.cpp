@@ -27,6 +27,8 @@ Coloration::Coloration(string filename) {
                     e1--, e2--; // Nodes in .col start at 1, we count var from 0
                     Contrainte contrainte(1, e1, "-", 1, e2, "!=", 0);
                     contraintes.push_back(contrainte);
+                    contraintes_par_var[e1].push_back(contraintes.size() - 1);
+                    contraintes_par_var[e2].push_back(contraintes.size() - 1);
                 }
             }
             file.close();
@@ -37,6 +39,7 @@ Coloration::Coloration(string filename) {
                 }
                 domaines.push_back(domaine);
             }
+            arbre = Arbre_dom(domaines);
         }
         else {
             cerr << "Could not open file" << endl;
