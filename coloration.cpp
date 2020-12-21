@@ -37,6 +37,7 @@ Coloration::Coloration(string filename) {
                 }
                 domaines.push_back(domaine);
             }
+            arbre = Arbre_dom(domaines);
         }
         else {
             cerr << "Could not open file" << endl;

@@ -70,4 +70,5 @@ Reine::Reine(int n){
         }
         domaines.push_back(dom);
     }
+    arbre = Arbre_dom(domaines);
 }
