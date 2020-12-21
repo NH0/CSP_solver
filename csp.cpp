@@ -57,8 +57,32 @@ bool Contrainte::satisfaite(int v1, int v2){
     return(comp.apply(ope.apply(v1*coef1,v2*coef2),valeur));
 }
 
+bool CSP::var_satisfait_contraintes(const int i) const {
+    for (const int& j : contraintes_par_var[i]) {
+        if (!contrainte_satisfiable(j)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool CSP::contrainte_satisfiable(const int i) const {
+    Contrainte contrainte = contraintes[i];
+    for (auto const &i : domaines[contrainte.var1]) {
+        for (auto const &j : domaines[contrainte.var2]) {
+            if (contrainte.satisfaite(i, j)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 Reine::Reine(int n){
     nb_var = n;
+    for (int i = 0; i<n; i++) {
+        contraintes_par_var.push_back({});
+    }
     for (int i = 0; i<n; i++){
         vector<int> domaine_i;
         for (int j = 0; j<n ;j++){
