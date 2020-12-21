@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 #include <vector>
-#include <map>
 #include "arbre_dom.h"
 
 using namespace std;
@@ -39,12 +38,14 @@ public :
     int nb_var;
     vector<vector <int>> domaines; // les domaines énumérés
     vector<Contrainte> contraintes;
-    map<int, vector<int>> contraintes_par_var; // indice des contraintes par variable
+    vector<vector<int>> contraintes_par_var; // indice des contraintes par variable
     CSP(){nb_var = 0; domaines={}; contraintes = {}; arbre = Arbre_dom();} // constructeur par défaut
 //    vector<int> solve();
 protected :
     Arbre_dom arbre;
 private :
+    bool var_satisfait_contraintes(const int i) const;
+    bool contrainte_satisfiable(const int i) const;
 //    backtrack
 //    AC
 

@@ -18,6 +18,9 @@ Coloration::Coloration(string filename) {
                     string temp;
                     stream_s >> temp >> temp;
                     stream_s >> nb_var;
+                    for (int i = 0; i<nb_var; i++) {
+                        contraintes_par_var.push_back({});
+                    }
                 }
                 else if(line.compare(0,1,"e") == 0) {
                     string temp;
