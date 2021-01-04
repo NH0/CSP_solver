@@ -21,8 +21,16 @@ int main()
         cout << "var" << r5.contraintes[c].var2 << "*" << r5.contraintes[c].coef2 << r5.contraintes[c].comp.comp;
         cout <<  r5.contraintes[c].valeur << endl;
     }
+//    vector<int> valeurs = r5.solve();
+//    for (auto i : valeurs) {
+//        cout << i << endl;
+//    }
 
-//    Coloration col = Coloration("../huck.col");
+    Coloration col = Coloration("../thib.col");
+    vector<int> valeurs2 = col.solve();
+    for (auto i : valeurs2) {
+        cout << i << endl;
+    }
 //    cout << "Nombre de domaines :" << col.domaines.size() << endl;
 //    for (int c= 0; c<col.contraintes.size(); c++){
 //        cout << c << " eme contrainte : "   ;     cout << "var" << col.contraintes[c].var1 << "*" << col.contraintes[c].coef1 << col.contraintes[c].ope.op;
