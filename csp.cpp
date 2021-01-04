@@ -1,7 +1,7 @@
 #include "csp.h"
 #include <stdexcept>
 
-double Operation::apply(double a, double b){
+double Operation::apply(double a, double b) const{
     if (op == "+"){
         return a+b;
     }
@@ -19,7 +19,7 @@ double Operation::apply(double a, double b){
     }
 }
 
-bool Comparaison::apply(double a, double b){
+bool Comparaison::apply(double a, double b) const{
     if (comp == "="){
         return a==b;
     }
@@ -53,12 +53,12 @@ Contrainte::Contrainte(double c1, int i1, string o, double c2, int i2, string c,
     valeur = v;
 }
 
-bool Contrainte::satisfaite(int v1, int v2){
+bool Contrainte::satisfaite(const int v1, const int v2) const{
     return(comp.apply(ope.apply(v1*coef1,v2*coef2),valeur));
 }
 
-bool CSP::var_satisfait_contraintes(const int i) const {
-    for (const int& j : contraintes_par_var[i]) {
+bool CSP::var_satisfait_contraintes(const int var) const {
+    for (const int& j : contraintes_par_var[var]) {
         if (!contrainte_satisfiable(j)) {
             return false;
         }
