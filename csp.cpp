@@ -157,7 +157,7 @@ bool CSP::backtrack() {
     return false;
 }
 
-vector<int> intersection(vector<int> v1,vector<int>v2){
+vector<int> intersection(vector<int> &v1,vector<int> &v2){
     vector<int> v3;
     sort(v1.begin(), v1.end());
     sort(v2.begin(), v2.end());
@@ -168,14 +168,14 @@ vector<int> intersection(vector<int> v1,vector<int>v2){
 
 void CSP::arc_consistance(){
     vector<vector<int>> aTester;
-    map<vector<int>,vector<int>> contraintes_communes; // dictionnaire qui liste les contraintes communes à i et j (i<j)
+    map<pair<int,int>,vector<int>> contraintes_communes; // dictionnaire qui liste les contraintes communes à i et j (i<j)
     for (int i=0; i<nb_var;i++){
         for (int j=i+1; j<nb_var;j++){
             vector<int> communes = intersection(contraintes_par_var[i],contraintes_par_var[j]);
             if (not communes.empty()){
                 aTester.push_back({i,j});
                 aTester.push_back({j,i});
-                contraintes_communes.insert(pair<vector<int>,vector<int>>({i,j},communes));
+                contraintes_communes.insert(pair<pair<int,int>,vector<int>>({i,j},communes));
             }
         }
     }
@@ -195,13 +195,16 @@ void CSP::arc_consistance(){
         for (auto const &vx : domaines[test[0]]){
             for (auto const &vy : domaines[test[1]]){
                 support = true;
-                for (auto const &c : contraintes_communes.at({min(test[0],test[1]),max(test[0],test[1])})){
+                for (auto const &c : contraintes_communes[{min(test[0],test[1]),max(test[0],test[1])}]){
                     x_var1 = contraintes[c].var1==test[0];
                     if (x_var1){
-                        support = support and contraintes[c].satisfaite(vx,vy);
+                        support = contraintes[c].satisfaite(vx,vy);
                     }
                     else{
-                        support = support and contraintes[c].satisfaite(vy,vx);
+                        support = contraintes[c].satisfaite(vy,vx);
+                    }
+                    if (not support){
+                        break;
                     }
                 }
                 if (support){
