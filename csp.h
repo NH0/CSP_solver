@@ -9,14 +9,14 @@ struct Operation{
     string op; // "+","-","/","*"
     Operation(){op = '+';} // constructeur par défaut
     Operation(const string& o){op = o;}
-    double apply(double a, double b);
+    double apply(double a, double b) const;
 };
 
 struct Comparaison{
     string comp; // "<=",">=","<",">","=","!="
     Comparaison(){comp = '<';} // constructeur par défaut
     Comparaison(const string& c){comp = c;}
-    bool apply(double a, double b);
+    bool apply(double a, double b) const;
 };
 
 struct Contrainte{
@@ -30,23 +30,30 @@ struct Contrainte{
     double valeur;
     Contrainte(){coef1 = 0, coef2 = 0; var1 = 0; var2 = 0; ope = Operation(); comp = Comparaison(); valeur = 0;} // constructeur par défaut
     Contrainte(double c1, int i1, string o, double c2, int i2, string c, double v); // attention on utilise des string
-    bool satisfaite(int v1, int v2);
+    bool satisfaite(const int v1, const int v2) const;
 };
 
 class CSP{
 public :
     int nb_var;
     vector<vector <int>> domaines; // les domaines énumérés
+    vector<int*> instanciation; // nullptr si non instancié, sinon pointeur vers valeur dans domaine
+    int nb_instanciee;
     vector<Contrainte> contraintes;
     vector<vector<int>> contraintes_par_var; // indice des contraintes par variable
-    CSP(){nb_var = 0; domaines={}; contraintes = {}; arbre = Arbre_dom();} // constructeur par défaut
-//    vector<int> solve();
+    CSP(){nb_var = 0; nb_instanciee=0; domaines={}; contraintes = {}; arbre = Arbre_dom(); instanciation={};} // constructeur par défaut
+
+    bool backtrack();
+    vector<int> solve();
+
 protected :
     Arbre_dom arbre;
 private :
-    bool var_satisfait_contraintes(const int i) const;
+    bool var_satisfait_contraintes(const int var) const;
     bool contrainte_satisfiable(const int i) const;
-//    backtrack
+    bool contrainte_satisfiable(const Contrainte* contrainte, const int val1) const;
+    bool contraintes_satisfiables() const;
+
 //    AC
 
 };

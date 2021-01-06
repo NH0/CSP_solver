@@ -43,6 +43,7 @@ Coloration::Coloration(string filename) {
                 domaines.push_back(domaine);
             }
             arbre = Arbre_dom(domaines);
+            instanciation = vector<int*>(nb_var, nullptr);
         }
         else {
             cerr << "Could not open file" << endl;
