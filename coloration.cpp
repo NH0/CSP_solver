@@ -42,6 +42,11 @@ Coloration::Coloration(const string filename, const int k0) {
                     domaine.push_back(j);
                 }
                 domaines.push_back(domaine);
+
+                for (int j = i + 1; j<nb_var; j++) {
+                    vector<int> communes = intersection(contraintes_par_var[i], contraintes_par_var[j]);
+                    contraintes_communes.insert(pair<pair<int,int>,vector<int>>({i,j},communes));
+                }
             }
             arbre = Arbre_dom(domaines);
             instanciation = vector<int*>(nb_var, nullptr);

@@ -41,10 +41,14 @@ public :
     vector<vector <int>> domaines; // les domaines énumérés
     vector<int*> instanciation; // nullptr si non instancié, sinon pointeur vers valeur dans domaine
     int nb_instanciee;
+
     vector<Contrainte> contraintes;
     vector<vector<int>> contraintes_par_var; // indice des contraintes par variable
-    void arc_consistance();
+    map<pair<int,int>,vector<int>> contraintes_communes; // dictionnaire qui liste les contraintes communes à i et j (i<j)
+
     CSP(){nb_var = 0; nb_instanciee=0; domaines={}; contraintes = {}; arbre = Arbre_dom(); instanciation={};} // constructeur par défaut
+
+    bool arc_consistance();
     bool backtrack();
     vector<int> solve();
 
