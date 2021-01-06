@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <map>
 #include "arbre_dom.h"
 
 using namespace std;
@@ -13,7 +15,7 @@ struct Operation{
 };
 
 struct Comparaison{
-    string comp; // "<=",">=","<",">","=","!="
+    string comp; // "<=",">=","<",">","=","!=","=|"
     Comparaison(){comp = '<';} // constructeur par défaut
     Comparaison(const string& c){comp = c;}
     bool apply(double a, double b) const;
@@ -41,8 +43,8 @@ public :
     int nb_instanciee;
     vector<Contrainte> contraintes;
     vector<vector<int>> contraintes_par_var; // indice des contraintes par variable
+    void arc_consistance();
     CSP(){nb_var = 0; nb_instanciee=0; domaines={}; contraintes = {}; arbre = Arbre_dom(); instanciation={};} // constructeur par défaut
-
     bool backtrack();
     vector<int> solve();
 
@@ -54,8 +56,6 @@ private :
     bool contrainte_satisfiable(const Contrainte* contrainte, const int val1) const;
     bool contraintes_satisfiables() const;
 
-//    AC
-
 };
 
 class Reine : public CSP{
@@ -64,3 +64,4 @@ public :
     Reine(int n);
 };
 
+vector<int> intersection(vector<int> v1,vector<int>v2);
