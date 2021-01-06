@@ -26,7 +26,7 @@ int main()
 //        cout << i << endl;
 //    }
 
-    Coloration col = Coloration("../thib.col");
+    Coloration col = Coloration("../thib.col", 3);
     vector<int> valeurs2 = col.solve();
     for (auto i : valeurs2) {
         cout << i << endl;
