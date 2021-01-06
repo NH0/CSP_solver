@@ -68,13 +68,17 @@ void test_arc_consistence_voitures(){
         }
         cout <<endl;
     }
-
 }
 
 int main(){
     test_arc_consistence_voitures();
 
-//    Coloration col = Coloration("../huck.col");
+//    Coloration col = Coloration("./fpsol2.i.2.col", 300);
+//    vector<int> valeurs2 = col.solve();
+//    for (auto i : valeurs2) {
+//        cout << i << endl;
+//    }
+
 //    cout << "Nombre de domaines :" << col.domaines.size() << endl;
 //    for (int c= 0; c<col.contraintes.size(); c++){
 //        cout << c << " eme contrainte : "   ;     cout << "var" << col.contraintes[c].var1 << "*" << col.contraintes[c].coef1 << col.contraintes[c].ope.op;

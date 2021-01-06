@@ -7,7 +7,7 @@
 class Coloration : public CSP {
 public:
     Coloration(){throw std::invalid_argument("Please provide a filename for the data");};
-    Coloration(std::string filename);
+    Coloration(const std::string filename, const int k);
 };
 
 #endif // COLORATION_H
