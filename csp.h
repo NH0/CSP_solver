@@ -64,4 +64,4 @@ public :
     Reine(int n);
 };
 
-vector<int> intersection(vector<int> v1,vector<int>v2);
+vector<int> intersection(vector<int> &v1,vector<int> &v2);
