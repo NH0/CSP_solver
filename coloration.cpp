@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Coloration::Coloration(const string filename, const int k) {
+Coloration::Coloration(const string filename, const int k0) {
 //    contraintes.clear();
     fstream file;
     try {
@@ -35,6 +35,7 @@ Coloration::Coloration(const string filename, const int k) {
                 }
             }
             file.close();
+            k = k0;
             for (int i=0; i<nb_var; i++) {
                 vector<int> domaine;
                 for (int j=0; j<k; j++) {
