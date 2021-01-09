@@ -39,26 +39,20 @@ class CSP{
 public :
     int nb_var;
     vector<vector <int>> domaines; // les domaines énumérés
-    vector<int*> instanciation; // nullptr si non instancié, sinon pointeur vers valeur dans domaine
-    int nb_instanciee;
 
     vector<Contrainte> contraintes;
     vector<vector<int>> contraintes_par_var; // indice des contraintes par variable
     map<pair<int,int>,vector<int>> contraintes_communes; // dictionnaire qui liste les contraintes communes à i et j (i<j)
 
-    CSP(){nb_var = 0; nb_instanciee=0; domaines={}; contraintes = {}; arbre = Arbre_dom(); instanciation={};} // constructeur par défaut
+    CSP(){nb_var = 0; domaines={}; contraintes = {}; arbre = Arbre_dom(domaines, contraintes);} // constructeur par défaut
 
     bool arc_consistance();
-    bool backtrack();
     vector<int> solve();
 
 protected :
     Arbre_dom arbre;
 private :
     bool var_satisfait_contraintes(const int var) const;
-    bool contrainte_satisfiable(const int i) const;
-    bool contrainte_satisfiable(const Contrainte* contrainte, const int val1) const;
-    bool contraintes_satisfiables() const;
 
 };
 
