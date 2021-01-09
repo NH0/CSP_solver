@@ -4,36 +4,13 @@
 #include <algorithm>
 #include <map>
 #include "arbre_dom.h"
+#include "contrainte.h"
 
 using namespace std;
 
-struct Operation{
-    string op; // "+","-","/","*"
-    Operation(){op = '+';} // constructeur par défaut
-    Operation(const string& o){op = o;}
-    double apply(double a, double b) const;
-};
-
-struct Comparaison{
-    string comp; // "<=",">=","<",">","=","!=","=|"
-    Comparaison(){comp = '<';} // constructeur par défaut
-    Comparaison(const string& c){comp = c;}
-    bool apply(double a, double b) const;
-};
-
-struct Contrainte{
-    // coef1 * var1 ope coef2 * var2 comp valeur
-    double coef1;
-    int var1; // indice de la variable 1
-    double coef2;
-    int var2; // indice de la variable 2
-    Operation ope;
-    Comparaison comp;
-    double valeur;
-    Contrainte(){coef1 = 0, coef2 = 0; var1 = 0; var2 = 0; ope = Operation(); comp = Comparaison(); valeur = 0;} // constructeur par défaut
-    Contrainte(double c1, int i1, string o, double c2, int i2, string c, double v); // attention on utilise des string
-    bool satisfaite(const int v1, const int v2) const;
-};
+/*  T : Foward checking
+ *  T : Faire des heuristiques pour le BT
+ */
 
 class CSP{
 public :
