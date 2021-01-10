@@ -74,10 +74,13 @@ int main(){
 //    test_arc_consistence_voitures();
 
     Coloration col = Coloration("../fpsol2.i.2.col", 300);
-    vector<int> valeurs2 = col.solve();
+    vector<int> valeurs2 = col.solve(bt_heuristic::varlargest);
+    int count = 0;
     for (auto i : valeurs2) {
         cout << i << endl;
+        count++;
     }
+    cout << "nb : " << count << endl;
 
 //    cout << "Nombre de domaines :" << col.domaines.size() << endl;
 //    for (int c= 0; c<col.contraintes.size(); c++){

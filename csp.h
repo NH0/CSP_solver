@@ -24,13 +24,12 @@ public :
     CSP(){nb_var = 0; domaines={}; contraintes = {}; arbre = Arbre_dom(domaines, contraintes);} // constructeur par défaut
 
     bool arc_consistance();
-    vector<int> solve();
+    vector<int> solve(bt_heuristic heuristic);
 
 protected :
     Arbre_dom arbre;
 private :
     bool var_satisfait_contraintes(const int var) const;
-
 };
 
 class Reine : public CSP{

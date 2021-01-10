@@ -3,6 +3,12 @@
 #include <vector>
 #include "contrainte.h"
 
+enum struct bt_heuristic {
+    varlargest,
+    varsmallest,
+    varrandom
+};
+
 class Arbre_dom {
     typedef std::vector<int> domaine;
 private:
@@ -22,9 +28,10 @@ private:
     bool contrainte_satisfiable(Contrainte const* const contrainte, int const val1) const;
     bool contraintes_satisfiables() const;
 
-    int* plus_petite_a_instancier() const;
-    int* plus_grande_a_instancier() const;
-    int* alea_a_instancier() const;
+    static int bt_smallest_dom(std::vector<domaine> const& domaines, std::vector<bool> const& est_instanciee);
+    static int bt_largest_dom(std::vector<domaine> const& domaines, std::vector<bool> const& est_instanciee);
+    static int bt_random(std::vector<bool> const& est_instanciee);
+    static int bt_random(std::vector<domaine> const& domaines, std::vector<bool> const& est_instanciee);
 
 public:
     Arbre_dom() : parent(nullptr) {nb_instanciee = 0;};
@@ -46,7 +53,8 @@ public:
 
     int get_nb_fils() const;
 
-    bool backtrack();
+    bool backtrack(int heuristique_var(std::vector<domaine> const&, std::vector<bool> const&));
+    bool backtrack(bt_heuristic heuristic);
 
 };
 

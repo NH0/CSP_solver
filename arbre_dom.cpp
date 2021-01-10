@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <stdexcept>
+#include <iterator>
+#include <random>
 #include "arbre_dom.h"
 
 using namespace std;
@@ -154,19 +156,68 @@ bool Arbre_dom::contraintes_satisfiables() const {
     return true;
 }
 
-int* Arbre_dom::plus_petite_a_instancier() const {
-    return nullptr;
+int Arbre_dom::bt_smallest_dom(vector<domaine> const& domaines, vector<bool> const& est_instanciee) {
+    int smallest = 0;
+    int smallest_s = domaines[0].size();
+    for (int i = 0; i<domaines.size(); i++) {
+        if (not(est_instanciee[i]) && domaines[i].size() < smallest_s) {
+            smallest = i;
+            smallest_s = domaines[i].size();
+        }
+    }
+    return smallest;
 }
 
-int* Arbre_dom::plus_grande_a_instancier() const {
-    return nullptr;
+int Arbre_dom::bt_largest_dom(vector<domaine> const& domaines, vector<bool> const& est_instanciee) {
+    int largest = 0;
+    int largest_s = domaines[0].size();
+    for (int i = 0; i<domaines.size(); i++) {
+        if (not(est_instanciee[i]) && domaines[i].size() > largest_s) {
+            largest = i;
+            largest_s = domaines[i].size();
+        }
+    }
+    return largest;
 }
 
-int* Arbre_dom::alea_a_instancier() const {
-    return nullptr;
+int sample_if_false(vector<bool> const& vec) {
+    static random_device alea;
+    static mt19937 gen(alea());
+
+    int nb_false = 0;
+    for (auto i : vec) {
+        if (!i) {
+            nb_false++;
+        }
+    }
+    if (nb_false == 0) {
+        throw runtime_error("Cannot sample vector : all variables are true");
+    }
+
+    uniform_int_distribution<> distrib(0, nb_false - 1);
+    int ieme_element = distrib(gen);
+    nb_false = 0;
+    for (int i = 0; i<vec.size(); i++) {
+        if (!vec[i]) {
+            if(nb_false == ieme_element) {
+                return i;
+            }
+            nb_false++;
+        }
+    }
+
+    throw runtime_error("Empty sample !");
 }
 
-bool Arbre_dom::backtrack() {
+int Arbre_dom::bt_random(std::vector<domaine> const&, vector<bool> const& est_instanciee) {
+    return sample_if_false(est_instanciee);
+}
+
+int Arbre_dom::bt_random(vector<bool> const& est_instanciee) {
+    return sample_if_false(est_instanciee);
+}
+
+bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine> const&, vector<bool> const&)) {
     if (!contraintes_satisfiables()) {
         return false;
     }
@@ -174,13 +225,10 @@ bool Arbre_dom::backtrack() {
         solution = vector<int>(val_instanciation);
         return true;
     }
-    int i = 0;
-    // On prend la premiere non instanciée : HEURISTIQUE
-    while (est_instanciee[i]) {
-        i++;
-    }
+    int i = heuristique_var(domaines, est_instanciee);
     for (auto j = 0; j<domaines[i].size(); j++) {
-        // On prend la première valeur dans le domaine : HEURISTIQUE
+        // On prend la première valeur dans le domaine : HEURISTIQUE : plus petite var, plus grande var, alea ...
+        // Pour ça : trier domaines[i] dans l'ordre voulu
         vector<domaine> nouv_domaines = vector<domaine>(domaines);
         nouv_domaines[i] = {domaines[i][j]};
         vector<int> nouv_val_instanciation = vector<int>(val_instanciation);
@@ -189,10 +237,25 @@ bool Arbre_dom::backtrack() {
         nouv_est_instanciee[i] = true;
         ajout_fils(nouv_domaines, nouv_val_instanciation, nouv_est_instanciee);
 
-        if (get_dernier_fils()->backtrack()) {
+        if (get_dernier_fils()->backtrack(heuristique_var)) {
             return true;
         }
     }
 
     return false;
+}
+
+bool Arbre_dom::backtrack(bt_heuristic heuristic) {
+    if (heuristic == bt_heuristic::varlargest) {
+        return backtrack(Arbre_dom::bt_largest_dom);
+    }
+    else if (heuristic == bt_heuristic::varsmallest) {
+        return backtrack(Arbre_dom::bt_smallest_dom);
+    }
+    else if (heuristic == bt_heuristic::varrandom) {
+        return backtrack(Arbre_dom::bt_random);
+    }
+    else {
+        throw runtime_error("Calling backtrack with non existent heuristic !");
+    }
 }
