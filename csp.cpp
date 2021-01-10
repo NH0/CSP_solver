@@ -117,5 +117,5 @@ Reine::Reine(int n){
         }
         domaines.push_back(domaine_i);
     }
-    arbre = Arbre_dom(domaines, contraintes);
+    arbre = Arbre_dom(domaines, contraintes, contraintes_par_var);
 }

@@ -48,7 +48,7 @@ Coloration::Coloration(const string filename, const int k0) {
                     contraintes_communes.insert(pair<pair<int,int>,vector<int>>({i,j},communes));
                 }
             }
-            arbre = Arbre_dom(domaines, contraintes);
+            arbre = Arbre_dom(domaines, contraintes, contraintes_par_var);
         }
         else {
             cerr << "Could not open file" << endl;

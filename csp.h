@@ -21,15 +21,13 @@ public :
     vector<vector<int>> contraintes_par_var; // indice des contraintes par variable
     map<pair<int,int>,vector<int>> contraintes_communes; // dictionnaire qui liste les contraintes communes à i et j (i<j)
 
-    CSP(){nb_var = 0; domaines={}; contraintes = {}; arbre = Arbre_dom(domaines, contraintes);} // constructeur par défaut
+    CSP(){nb_var = 0; domaines={}; contraintes = {}; arbre = Arbre_dom(domaines, contraintes, contraintes_par_var);} // constructeur par défaut
 
     bool arc_consistance();
     vector<int> solve(bt_heuristic heuristic);
 
 protected :
     Arbre_dom arbre;
-private :
-    bool var_satisfait_contraintes(const int var) const;
 };
 
 class Reine : public CSP{

@@ -10,9 +10,10 @@ typedef std::vector<int> domaine;
 
 int Arbre_dom::nb_var=0;
 vector<Contrainte> Arbre_dom::contraintes = {};
+vector<vector<int>> Arbre_dom::contraintes_par_var = {};
 vector<int> Arbre_dom::solution = {};
 
-Arbre_dom::Arbre_dom(std::vector<domaine>& init_domaines, vector<Contrainte>& init_contraintes) {
+Arbre_dom::Arbre_dom(std::vector<domaine>& init_domaines, vector<Contrainte>& init_contraintes, vector<vector<int>>& init_contrainte_var) {
     parent = nullptr;
     domaines = init_domaines;
     fils = {};
@@ -22,6 +23,7 @@ Arbre_dom::Arbre_dom(std::vector<domaine>& init_domaines, vector<Contrainte>& in
     nb_instanciee = 0;
 
     Arbre_dom::contraintes = init_contraintes;
+    Arbre_dom::contraintes_par_var = init_contrainte_var;
 }
 
 Arbre_dom::Arbre_dom(Arbre_dom* init_parent, vector<domaine>& init_domaines) {
@@ -94,6 +96,15 @@ int Arbre_dom::get_nb_fils() const {
     return fils.size();
 }
 
+bool Arbre_dom::var_satisfait_contraintes(int const var) const {
+    for (auto c : contraintes_par_var[var]) {
+        if (not(contrainte_satisfiable(c))) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool Arbre_dom::contrainte_satisfiable(Contrainte const* const contrainte, int const val1) const {
     /**
      * @brief Contrainte est-elle satisfiable avec var1 = val1 ?
@@ -113,11 +124,11 @@ bool Arbre_dom::contrainte_satisfiable(Contrainte const* const contrainte, int c
     return false;
 }
 
-bool Arbre_dom::contrainte_satisfiable(int const i) const {
+bool Arbre_dom::contrainte_satisfiable(int const c) const {
     /**
      * @brief Contrainte d'indice i est-elle satisfiable par instanciatin ?
      */
-    Contrainte const contrainte = contraintes[i];
+    Contrainte const contrainte = contraintes[c];
     // Si la variable est instanciée
     if (est_instanciee[contrainte.var1]) {
         return contrainte_satisfiable(&contrainte, val_instanciation[contrainte.var1]);
@@ -237,7 +248,35 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine> const&, vecto
         nouv_est_instanciee[i] = true;
         ajout_fils(nouv_domaines, nouv_val_instanciation, nouv_est_instanciee);
 
-        if (get_dernier_fils()->backtrack(heuristique_var)) {
+        if (get_dernier_fils()->backtrack(heuristique_var, i)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine> const&, vector<bool> const&), int var_instanciee) {
+    if (not(var_satisfait_contraintes(var_instanciee))) {
+        return false;
+    }
+    if (nb_instanciee == nb_var) {
+        solution = vector<int>(val_instanciation);
+        return true;
+    }
+    int i = heuristique_var(domaines, est_instanciee);
+    for (auto j = 0; j<domaines[i].size(); j++) {
+        // On prend la première valeur dans le domaine : HEURISTIQUE : plus petite var, plus grande var, alea ...
+        // Pour ça : trier domaines[i] dans l'ordre voulu
+        vector<domaine> nouv_domaines = vector<domaine>(domaines);
+        nouv_domaines[i] = {domaines[i][j]};
+        vector<int> nouv_val_instanciation = vector<int>(val_instanciation);
+        nouv_val_instanciation[i] = nouv_domaines[i][0];
+        vector<bool> nouv_est_instanciee = vector<bool>(est_instanciee);
+        nouv_est_instanciee[i] = true;
+        ajout_fils(nouv_domaines, nouv_val_instanciation, nouv_est_instanciee);
+
+        if (get_dernier_fils()->backtrack(heuristique_var, i)) {
             return true;
         }
     }
