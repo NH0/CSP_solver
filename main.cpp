@@ -89,7 +89,7 @@ int reponse_entier_relatif(const string s){
 }
 
 double reponse_reel(const string s){
-    string rep = rep;
+    string rep = "rep";
     while (not est_reel(rep)){
         cout << s << endl;
         cout << "Donnez un reel (mettre un - pour dire qu'il est négatf et un . si il n'est pas entier";
@@ -114,6 +114,7 @@ vector<int> obtenir_domaine(){ // obtenir un domaine
             dom.push_back(reponse_entier_relatif("Quelle est la "+to_string(i)+"e valeur ?"));
         }
     }
+    return dom;
 }
 
 void obtenir_domaine(vector<vector<int>> dom){  // si les domaines sont identiques

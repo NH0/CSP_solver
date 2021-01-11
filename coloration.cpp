@@ -44,7 +44,7 @@ Coloration::Coloration(string const filename, int const k0) {
                         e1 = e3;
                     }
                     Contrainte c = Contrainte(e1, domaines[e1],e2, domaines[e2]);
-                    c.supprime_relations(1, domaines[e1],"-",2, domaines[e2],"!=",0);
+                    c.supprime_relations(1, domaines[e1],"-",1, domaines[e2],"!=",0);
                     contraintes.push_back(c);
                     contraintes_par_var[e1].push_back(contraintes.size() - 1);
                     contraintes_par_var[e2].push_back(contraintes.size() - 1);
@@ -52,7 +52,7 @@ Coloration::Coloration(string const filename, int const k0) {
                 }
             }
             file.close();
-            arbre = Arbre_dom(domaines, contraintes, contraintes_par_var,contraintes_communes);
+            arbre = Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
         }
         else {
             cerr << "Could not open file" << endl;
@@ -78,7 +78,7 @@ Coloration::Coloration(Coloration* col, int const k0) {
     contraintes = col->contraintes;
     contraintes_par_var = col->contraintes_par_var;
     contraintes_communes = col->contraintes_communes;
-    arbre = Arbre_dom(domaines, contraintes, contraintes_par_var);
+    arbre = Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
 }
 
 int Coloration::solve_mincol() {
