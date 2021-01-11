@@ -9,29 +9,37 @@ using namespace std;
 typedef std::vector<int> domaine;
 
 int Arbre_dom::nb_var=0;
-vector<Contrainte> Arbre_dom::contraintes = {};
-vector<vector<int>> Arbre_dom::contraintes_par_var = {};
+vector<Contrainte> temp_vec = {};
+vector<Contrainte>& Arbre_dom::contraintes = temp_vec;
+vector<vector<int>> temp_vec2 = {};
+vector<vector<int>>& Arbre_dom::contraintes_par_var = temp_vec2;
 vector<int> Arbre_dom::solution = {};
 
 Arbre_dom::Arbre_dom(std::vector<domaine>& init_domaines, vector<Contrainte>& init_contraintes, vector<vector<int>>& init_contrainte_var) {
     parent = nullptr;
     domaines = init_domaines;
     fils = {};
-    nb_var = domaines.size();
+    if (nb_var == 0) {
+        nb_var = domaines.size();
+    }
     val_instanciation = vector<int>(nb_var, 0);
     est_instanciee = vector<bool>(nb_var, false);
     nb_instanciee = 0;
 
-    Arbre_dom::contraintes = init_contraintes;
-    Arbre_dom::contraintes_par_var = init_contrainte_var;
+    if (Arbre_dom::contraintes.empty()) {
+        Arbre_dom::contraintes = init_contraintes;
+    }
+    if (Arbre_dom::contraintes_par_var.empty()) {
+        Arbre_dom::contraintes_par_var = init_contrainte_var;
+    }
 }
 
 Arbre_dom::Arbre_dom(Arbre_dom* init_parent, vector<domaine>& init_domaines) {
     parent = init_parent;
     domaines = init_domaines;
     fils = {};
-    val_instanciation = vector<int>(parent->val_instanciation);
-    est_instanciee = vector<bool>(parent->est_instanciee);
+    val_instanciation = parent->val_instanciation;
+    est_instanciee = parent->est_instanciee;
     nb_instanciee = parent->nb_instanciee;
 }
 
@@ -167,7 +175,7 @@ bool Arbre_dom::contraintes_satisfiables() const {
     return true;
 }
 
-int Arbre_dom::bt_smallest_dom(vector<domaine> const& domaines, vector<bool> const& est_instanciee) {
+int Arbre_dom::bt_var_smallest_dom(vector<domaine> const& domaines, vector<bool> const& est_instanciee) {
     int smallest = 0;
     int smallest_s = domaines[0].size();
     for (int i = 0; i<domaines.size(); i++) {
@@ -179,7 +187,7 @@ int Arbre_dom::bt_smallest_dom(vector<domaine> const& domaines, vector<bool> con
     return smallest;
 }
 
-int Arbre_dom::bt_largest_dom(vector<domaine> const& domaines, vector<bool> const& est_instanciee) {
+int Arbre_dom::bt_var_largest_dom(vector<domaine> const& domaines, vector<bool> const& est_instanciee) {
     int largest = 0;
     int largest_s = domaines[0].size();
     for (int i = 0; i<domaines.size(); i++) {
@@ -233,18 +241,16 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine> const&, vecto
         return false;
     }
     if (nb_instanciee == nb_var) {
-        solution = vector<int>(val_instanciation);
+        solution = val_instanciation;
         return true;
     }
     int i = heuristique_var(domaines, est_instanciee);
     for (auto j = 0; j<domaines[i].size(); j++) {
-        // On prend la première valeur dans le domaine : HEURISTIQUE : plus petite var, plus grande var, alea ...
-        // Pour ça : trier domaines[i] dans l'ordre voulu
-        vector<domaine> nouv_domaines = vector<domaine>(domaines);
+        vector<domaine> nouv_domaines = domaines;
         nouv_domaines[i] = {domaines[i][j]};
-        vector<int> nouv_val_instanciation = vector<int>(val_instanciation);
+        vector<int> nouv_val_instanciation = val_instanciation;
         nouv_val_instanciation[i] = nouv_domaines[i][0];
-        vector<bool> nouv_est_instanciee = vector<bool>(est_instanciee);
+        vector<bool> nouv_est_instanciee = est_instanciee;
         nouv_est_instanciee[i] = true;
         ajout_fils(nouv_domaines, nouv_val_instanciation, nouv_est_instanciee);
 
@@ -261,18 +267,19 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine> const&, vecto
         return false;
     }
     if (nb_instanciee == nb_var) {
-        solution = vector<int>(val_instanciation);
-        return true;
+        if (contraintes_satisfiables()) {
+            solution = val_instanciation;
+            return true;
+        }
+        return false;
     }
     int i = heuristique_var(domaines, est_instanciee);
     for (auto j = 0; j<domaines[i].size(); j++) {
-        // On prend la première valeur dans le domaine : HEURISTIQUE : plus petite var, plus grande var, alea ...
-        // Pour ça : trier domaines[i] dans l'ordre voulu
-        vector<domaine> nouv_domaines = vector<domaine>(domaines);
+        vector<domaine> nouv_domaines = domaines;
         nouv_domaines[i] = {domaines[i][j]};
-        vector<int> nouv_val_instanciation = vector<int>(val_instanciation);
+        vector<int> nouv_val_instanciation = val_instanciation;
         nouv_val_instanciation[i] = nouv_domaines[i][0];
-        vector<bool> nouv_est_instanciee = vector<bool>(est_instanciee);
+        vector<bool> nouv_est_instanciee = est_instanciee;
         nouv_est_instanciee[i] = true;
         ajout_fils(nouv_domaines, nouv_val_instanciation, nouv_est_instanciee);
 

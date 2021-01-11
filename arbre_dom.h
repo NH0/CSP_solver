@@ -12,8 +12,8 @@ enum struct bt_heuristic {
 class Arbre_dom {
     typedef std::vector<int> domaine;
 private:
-    static std::vector<Contrainte> contraintes;
-    static std::vector<std::vector<int>> contraintes_par_var;
+    static std::vector<Contrainte>& contraintes;
+    static std::vector<std::vector<int>>& contraintes_par_var;
     static int nb_var;
     static std::vector<int> solution;
 
@@ -23,7 +23,7 @@ private:
     int nb_instanciee;
 
     std::vector<Arbre_dom*> fils; // vide si une feuille
-    Arbre_dom* parent; // pointeur 0 si racine
+    Arbre_dom* parent; // pointeur nullptr si racine
 
     bool var_satisfait_contraintes(int const var) const;
     bool contrainte_satisfiable(int const c) const;

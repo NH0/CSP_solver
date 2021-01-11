@@ -2,10 +2,11 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
-Coloration::Coloration(const string filename, const int k0) {
+Coloration::Coloration(string const filename, int const k0) {
 //    contraintes.clear();
     fstream file;
     try {
