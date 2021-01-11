@@ -50,7 +50,7 @@ public:
     std::vector<int> const& get_instanciation() const;
     std::vector<int> const& get_solution() const;
 
-    void delete_values(int var, std::vector<int> values);
+    void delete_values(int var, std::vector<int>& values);
 
     void ajout_fils(Arbre_dom& fil);
     void ajout_fils(std::vector<domaine>& init_domaines);

@@ -302,7 +302,7 @@ bool Arbre_dom::backtrack(bt_heuristic heuristic) {
     }
 }
 
-void Arbre_dom::delete_values(int var, std::vector<int> values){
+void Arbre_dom::delete_values(int var,std::vector<int>& values){
     for (auto const val : values){
         domaines[var].erase(remove(domaines[var].begin(), domaines[var].end(), val), domaines[var].end());
     }

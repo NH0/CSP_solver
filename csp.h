@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
+#include <vector>
 #include "arbre_dom.h"
 #include "contrainte.h"
 
