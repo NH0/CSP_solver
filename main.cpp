@@ -73,14 +73,9 @@ void test_reine(int nb_reines, bool ac){
 int main(){
 //    test_arc_consistence_voitures();
 
-    Coloration col = Coloration("../fpsol2.i.2.col", 300);
-    vector<int> valeurs2 = col.solve(bt_heuristic::varlargest);
-    int count = 0;
-    for (auto i : valeurs2) {
-        cout << i << endl;
-        count++;
-    }
-    cout << "nb : " << count << endl;
+    Coloration col = Coloration("../thib.col", 10);
+    cout << col.solve_mincol() << endl;
+
 
 //    cout << "Nombre de domaines :" << col.domaines.size() << endl;
 //    for (int c= 0; c<col.contraintes.size(); c++){
