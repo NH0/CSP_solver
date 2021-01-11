@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
-#include <vector>
 #include <algorithm>
 #include <map>
+#include <vector>
 #include "arbre_dom.h"
 #include "contrainte.h"
 
@@ -20,11 +20,10 @@ public :
 
     vector<Contrainte> contraintes;
     vector<vector<int>> contraintes_par_var; // indice des contraintes par variable
-    map<pair<int,int>,vector<int>> contraintes_communes; // dictionnaire qui liste les contraintes communes à i et j (i<j)
+    map<pair<int,int>,int> contraintes_communes; // dictionnaire qui liste les contraintes communes à i et j (i<j)
 
-    CSP(){nb_var = 0; domaines={}; contraintes = {}; arbre = Arbre_dom(domaines, contraintes, contraintes_par_var);} // constructeur par défaut
+    CSP(){nb_var = 0; domaines={}; contraintes = {}; arbre = Arbre_dom(domaines, contraintes, contraintes_par_var,contraintes_communes);} // constructeur par défaut
 
-    bool arc_consistance();
     vector<int> solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic);
 
 protected :

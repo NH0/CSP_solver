@@ -1,6 +1,7 @@
-#ifndef CONTRAINTE_H
-#define CONTRAINTE_H
-#include <string>
+#pragma once
+#include <bits/stdc++.h>
+#include <utility>
+#include <vector>
 
 struct Operation{
     std::string op; // "+","-","/","*"
@@ -17,17 +18,14 @@ struct Comparaison{
 };
 
 struct Contrainte{
-    // coef1 * var1 ope coef2 * var2 comp valeur
-    double coef1;
-    int var1; // indice de la variable 1
-    double coef2;
-    int var2; // indice de la variable 2
-    Operation ope;
-    Comparaison comp;
-    double valeur;
-    Contrainte(){coef1 = 0, coef2 = 0; var1 = 0; var2 = 0; ope = Operation(); comp = Comparaison(); valeur = 0;} // constructeur par défaut
-    Contrainte(double c1, int i1, std::string o, double c2, int i2, std::string c, double v); // attention on utilise des string
+    int var1, var2;
+    std::set<std::pair<int,int>> c;
+    Contrainte(); // constructeur par défaut
+    Contrainte(const int v1,const int v2){var1 = v1; var2 = v2; c={};}
+    Contrainte(const int v1, const std::vector<int> dom1, const int v2, const std::vector<int> dom2);
+
+    void ajoute_relation(const int value1, const int value2);
+    void supprime_relations(double coef1, const std::vector<int> dom1, std::string ope, double coef2, const std::vector<int> dom2, std::string compa, double valeur);
+
     bool satisfaite(const int v1, const int v2) const;
 };
-
-#endif // CONTRAINTE_H

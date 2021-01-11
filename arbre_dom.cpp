@@ -9,13 +9,18 @@ using namespace std;
 typedef std::vector<int> domaine;
 
 int Arbre_dom::nb_var=0;
+
 vector<Contrainte> temp_vec = {};
 vector<Contrainte>& Arbre_dom::contraintes = temp_vec;
 vector<vector<int>> temp_vec2 = {};
 vector<vector<int>>& Arbre_dom::contraintes_par_var = temp_vec2;
+map<pair<int,int>,int> temp_map = {};
+map<pair<int,int>,int>& Arbre_dom::contraintes_communes = temp_map;
+
 vector<int> Arbre_dom::solution = {};
 
-Arbre_dom::Arbre_dom(std::vector<domaine>& init_domaines, vector<Contrainte>& init_contraintes, vector<vector<int>>& init_contrainte_var) {
+
+Arbre_dom::Arbre_dom(std::vector<domaine>& init_domaines, vector<Contrainte>& init_contraintes, vector<vector<int>>& init_contrainte_var, map<pair<int,int>,int>& init_contrainte_comm) {
     parent = nullptr;
     domaines = init_domaines;
     fils = {};
@@ -31,6 +36,9 @@ Arbre_dom::Arbre_dom(std::vector<domaine>& init_domaines, vector<Contrainte>& in
     }
     if (Arbre_dom::contraintes_par_var.empty()) {
         Arbre_dom::contraintes_par_var = init_contrainte_var;
+    }
+    if (Arbre_dom::contraintes_communes.empty()) {
+        Arbre_dom::contraintes_communes = init_contrainte_comm;
     }
 }
 
@@ -343,4 +351,73 @@ bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_h
     }
 
     return backtrack(pheuristique_var, pheuristique_val);
+}
+
+void Arbre_dom::delete_values(int var,std::vector<int>& values){
+    for (auto const val : values){
+        domaines[var].erase(remove(domaines[var].begin(), domaines[var].end(), val), domaines[var].end());
+    }
+}
+
+bool Arbre_dom::arc_consistence(){
+    vector<vector<int>> aTester;
+    for (int i=0; i<nb_var;i++){
+        for (int j=i+1; j<nb_var;j++){
+            if (contraintes_communes.find(pair<int,int>(i,j)) !=contraintes_communes.end()){
+                aTester.push_back({i,j});
+                aTester.push_back({j,i});
+            }
+        }
+    }
+
+    bool empty_var = false;
+
+    while (not (aTester.empty() or empty_var)){
+        vector<int> test = aTester[aTester.size()-1]; // c'est le couple de variable qu'on teste
+        aTester.pop_back();
+        vector<int> aSupprimer; // c'est la liste des variables à supprimer du domaine
+        // avec cette première boucle, nous testons si il existe un support pour chaque valeur de la variable x
+        for (auto const &vx : domaines[test[0]]){
+            bool support = true; // c'est le booléen qui nous aidera à determiner si une valeur de x à un support
+            for (auto const &vy : domaines[test[1]]){
+                support = true;
+                int c = contraintes_communes[pair<int,int>(min(test[0],test[1]),max(test[0],test[1]))];
+
+                if (contraintes[c].var1==test[0]){
+                    support = contraintes[c].satisfaite(vx,vy);
+                }
+                else{
+                    support = contraintes[c].satisfaite(vy,vx);
+                }
+                if (support){
+                    break; // pas besoin de tester tous les vy si on a déjà un support
+                }
+            }
+            if (not support){ // si l'on a pas de support : on doit supprimer vx
+                aSupprimer.push_back(vx);
+            }
+        }
+        // si ce n'est pas le cas, on ajoute des nouvelles contraintes à tester
+        // car elles peuvent etre impactées par la suppression de valeur(s) du domaine de x
+        if (not aSupprimer.empty()){
+            for (int i=0;i<nb_var;i++){
+                if (contraintes_communes.find(pair<int,int>(i,test[0])) !=contraintes_communes.end()){
+                    if (min(i,test[0])==test[0] and max(i,test[0])!=test[1]){
+                        aTester.push_back({max(i,test[0]),test[0]});
+                    }
+                    if (max(i,test[0])==test[0] and min(i,test[0])!=test[1]){
+                        aTester.push_back({min(i,test[0]),test[0]});
+                    }
+                }
+            }
+            delete_values(test[0],aSupprimer);
+        }
+
+        empty_var = domaines[test[0]].empty();
+    }
+    if (empty_var){
+        cerr << "Probleme non realisable" << endl;
+        return false;
+    }
+    return true;
 }
