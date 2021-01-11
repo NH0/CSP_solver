@@ -5,18 +5,26 @@
 #include <utility>
 #include "contrainte.h"
 
-enum struct bt_heuristic {
+enum struct bt_heuristic_var {
     varlargest,
     varsmallest,
     varrandom
 };
 
+enum struct bt_heuristic_val {
+    vallargest,
+    valsmallest,
+    valrandom
+};
+
 class Arbre_dom {
     typedef std::vector<int> domaine;
 private:
-    static std::vector<Contrainte> contraintes;
-    static std::vector<std::vector<int>> contraintes_par_var;
-    static std::map<std::pair<int,int>,int> contraintes_communes;
+
+    static std::vector<Contrainte>& contraintes;
+    static std::vector<std::vector<int>>& contraintes_par_var;
+    static std::map<std::pair<int,int>,int>& contraintes_communes;
+
     static int nb_var;
     static std::vector<int> solution;
 
@@ -26,17 +34,21 @@ private:
     int nb_instanciee;
 
     std::vector<Arbre_dom*> fils; // vide si une feuille
-    Arbre_dom* parent; // pointeur 0 si racine
+    Arbre_dom* parent; // pointeur nullptr si racine
 
     bool var_satisfait_contraintes(int const var) const;
     bool contrainte_satisfiable(int const c) const;
     bool contrainte_satisfiable(Contrainte const* const contrainte, int const val1) const;
     bool contraintes_satisfiables() const;
 
-    static int bt_smallest_dom(std::vector<domaine> const& domaines, std::vector<bool> const& est_instanciee);
-    static int bt_largest_dom(std::vector<domaine> const& domaines, std::vector<bool> const& est_instanciee);
-    static int bt_random(std::vector<bool> const& est_instanciee);
-    static int bt_random(std::vector<domaine> const& domaines, std::vector<bool> const& est_instanciee);
+    static int bt_var_smallest_dom(std::vector<domaine> const& domaines, std::vector<bool> const& est_instanciee);
+    static int bt_var_largest_dom(std::vector<domaine> const& domaines, std::vector<bool> const& est_instanciee);
+    static int bt_var_random(std::vector<bool> const& est_instanciee);
+    static int bt_var_random(std::vector<domaine> const& domaines, std::vector<bool> const& est_instanciee);
+
+    static void bt_val_smallest(domaine & val_dom);
+    static void bt_val_largest(domaine & val_dom);
+    static void bt_val_random(domaine & val_dom);
 
 
 public:
@@ -60,9 +72,9 @@ public:
 
     int get_nb_fils() const;
 
-    bool backtrack(int heuristique_var(std::vector<domaine> const&, std::vector<bool> const&));
-    bool backtrack(int heuristique_var(std::vector<domaine> const&, std::vector<bool> const&), int var_instanciee);
-    bool backtrack(bt_heuristic heuristic);
+    bool backtrack(int heuristique_var(std::vector<domaine> const&, std::vector<bool> const&), void heuristique_val(domaine &));
+    bool backtrack(int heuristique_var(std::vector<domaine> const&, std::vector<bool> const&), void heuristique_val(domaine &), int var_instanciee);
+    bool backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic);
 
     bool arc_consistence();
 

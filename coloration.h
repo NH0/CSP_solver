@@ -9,9 +9,10 @@ private:
     int k;
 public:
     Coloration(){throw std::invalid_argument("Please provide a filename for the data");};
-    Coloration(const std::string filename, const int k);
+    Coloration(std::string const filename, int const k);
+    Coloration(Coloration* col, int const k);
 
-//    int solve_mincol();
+    int solve_mincol();
 };
 
 #endif // COLORATION_H

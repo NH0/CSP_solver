@@ -9,9 +9,14 @@ using namespace std;
 typedef std::vector<int> domaine;
 
 int Arbre_dom::nb_var=0;
-vector<Contrainte> Arbre_dom::contraintes = {};
-vector<vector<int>> Arbre_dom::contraintes_par_var = {};
-map<pair<int,int>,int> Arbre_dom::contraintes_communes = {};
+
+vector<Contrainte> temp_vec = {};
+vector<Contrainte>& Arbre_dom::contraintes = temp_vec;
+vector<vector<int>> temp_vec2 = {};
+vector<vector<int>>& Arbre_dom::contraintes_par_var = temp_vec2;
+map<pair<int,int>,int> temp_map = {};
+map<pair<int,int>,int>& Arbre_dom::contraintes_communes = temp_map;
+
 vector<int> Arbre_dom::solution = {};
 
 
@@ -19,22 +24,30 @@ Arbre_dom::Arbre_dom(std::vector<domaine>& init_domaines, vector<Contrainte>& in
     parent = nullptr;
     domaines = init_domaines;
     fils = {};
-    nb_var = domaines.size();
+    if (nb_var == 0) {
+        nb_var = domaines.size();
+    }
     val_instanciation = vector<int>(nb_var, 0);
     est_instanciee = vector<bool>(nb_var, false);
     nb_instanciee = 0;
 
-    Arbre_dom::contraintes = init_contraintes;
-    Arbre_dom::contraintes_par_var = init_contrainte_var;
-    Arbre_dom::contraintes_communes = init_contrainte_comm;
+    if (Arbre_dom::contraintes.empty()) {
+        Arbre_dom::contraintes = init_contraintes;
+    }
+    if (Arbre_dom::contraintes_par_var.empty()) {
+        Arbre_dom::contraintes_par_var = init_contrainte_var;
+    }
+    if (Arbre_dom::contraintes_communes.empty()) {
+        Arbre_dom::contraintes_communes = init_contrainte_comm;
+    }
 }
 
 Arbre_dom::Arbre_dom(Arbre_dom* init_parent, vector<domaine>& init_domaines) {
     parent = init_parent;
     domaines = init_domaines;
     fils = {};
-    val_instanciation = vector<int>(parent->val_instanciation);
-    est_instanciee = vector<bool>(parent->est_instanciee);
+    val_instanciation = parent->val_instanciation;
+    est_instanciee = parent->est_instanciee;
     nb_instanciee = parent->nb_instanciee;
 }
 
@@ -170,7 +183,7 @@ bool Arbre_dom::contraintes_satisfiables() const {
     return true;
 }
 
-int Arbre_dom::bt_smallest_dom(vector<domaine> const& domaines, vector<bool> const& est_instanciee) {
+int Arbre_dom::bt_var_smallest_dom(vector<domaine> const& domaines, vector<bool> const& est_instanciee) {
     int smallest = 0;
     int smallest_s = domaines[0].size();
     for (int i = 0; i<domaines.size(); i++) {
@@ -182,7 +195,7 @@ int Arbre_dom::bt_smallest_dom(vector<domaine> const& domaines, vector<bool> con
     return smallest;
 }
 
-int Arbre_dom::bt_largest_dom(vector<domaine> const& domaines, vector<bool> const& est_instanciee) {
+int Arbre_dom::bt_var_largest_dom(vector<domaine> const& domaines, vector<bool> const& est_instanciee) {
     int largest = 0;
     int largest_s = domaines[0].size();
     for (int i = 0; i<domaines.size(); i++) {
@@ -223,35 +236,54 @@ int sample_if_false(vector<bool> const& vec) {
     throw runtime_error("Empty sample !");
 }
 
-int Arbre_dom::bt_random(std::vector<domaine> const&, vector<bool> const& est_instanciee) {
+int Arbre_dom::bt_var_random(std::vector<domaine> const&, vector<bool> const& est_instanciee) {
     return sample_if_false(est_instanciee);
 }
 
-int Arbre_dom::bt_random(vector<bool> const& est_instanciee) {
+int Arbre_dom::bt_var_random(vector<bool> const& est_instanciee) {
     return sample_if_false(est_instanciee);
 }
 
-bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine> const&, vector<bool> const&)) {
+void Arbre_dom::bt_val_smallest(domaine & val_dom) {
+    if (not is_sorted(val_dom.begin(), val_dom.end())) {
+        partial_sort(val_dom.begin(), val_dom.end(), val_dom.end());
+    }
+}
+
+bool reverse_comp(int const a, int const b) {
+    return a > b;
+}
+
+void Arbre_dom::bt_val_largest(domaine & val_dom) {
+    if (not is_sorted(val_dom.begin(), val_dom.end(), reverse_comp)) {
+        partial_sort(val_dom.begin(), val_dom.end(), val_dom.end(), reverse_comp);
+    }
+}
+
+void Arbre_dom::bt_val_random(domaine & val_dom) {
+    random_shuffle(val_dom.begin(), val_dom.end());
+}
+
+bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine> const&, vector<bool> const&), void heuristique_val(domaine &)) {
     if (!contraintes_satisfiables()) {
         return false;
     }
     if (nb_instanciee == nb_var) {
-        solution = vector<int>(val_instanciation);
+        solution = val_instanciation;
         return true;
     }
     int i = heuristique_var(domaines, est_instanciee);
+    heuristique_val(domaines[i]);
     for (auto j = 0; j<domaines[i].size(); j++) {
-        // On prend la première valeur dans le domaine : HEURISTIQUE : plus petite var, plus grande var, alea ...
-        // Pour ça : trier domaines[i] dans l'ordre voulu
-        vector<domaine> nouv_domaines = vector<domaine>(domaines);
+        vector<domaine> nouv_domaines = domaines;
         nouv_domaines[i] = {domaines[i][j]};
-        vector<int> nouv_val_instanciation = vector<int>(val_instanciation);
+        vector<int> nouv_val_instanciation = val_instanciation;
         nouv_val_instanciation[i] = nouv_domaines[i][0];
-        vector<bool> nouv_est_instanciee = vector<bool>(est_instanciee);
+        vector<bool> nouv_est_instanciee = est_instanciee;
         nouv_est_instanciee[i] = true;
         ajout_fils(nouv_domaines, nouv_val_instanciation, nouv_est_instanciee);
 
-        if (get_dernier_fils()->backtrack(heuristique_var, i)) {
+        if (get_dernier_fils()->backtrack(heuristique_var, heuristique_val, i)) {
             return true;
         }
     }
@@ -259,27 +291,29 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine> const&, vecto
     return false;
 }
 
-bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine> const&, vector<bool> const&), int var_instanciee) {
+bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine> const&, vector<bool> const&), void heuristique_val(domaine &), int var_instanciee) {
     if (not(var_satisfait_contraintes(var_instanciee))) {
         return false;
     }
     if (nb_instanciee == nb_var) {
-        solution = vector<int>(val_instanciation);
-        return true;
+        if (contraintes_satisfiables()) {
+            solution = val_instanciation;
+            return true;
+        }
+        return false;
     }
     int i = heuristique_var(domaines, est_instanciee);
+    heuristique_val(domaines[i]);
     for (auto j = 0; j<domaines[i].size(); j++) {
-        // On prend la première valeur dans le domaine : HEURISTIQUE : plus petite var, plus grande var, alea ...
-        // Pour ça : trier domaines[i] dans l'ordre voulu
-        vector<domaine> nouv_domaines = vector<domaine>(domaines);
+        vector<domaine> nouv_domaines = domaines;
         nouv_domaines[i] = {domaines[i][j]};
-        vector<int> nouv_val_instanciation = vector<int>(val_instanciation);
+        vector<int> nouv_val_instanciation = val_instanciation;
         nouv_val_instanciation[i] = nouv_domaines[i][0];
-        vector<bool> nouv_est_instanciee = vector<bool>(est_instanciee);
+        vector<bool> nouv_est_instanciee = est_instanciee;
         nouv_est_instanciee[i] = true;
         ajout_fils(nouv_domaines, nouv_val_instanciation, nouv_est_instanciee);
 
-        if (get_dernier_fils()->backtrack(heuristique_var, i)) {
+        if (get_dernier_fils()->backtrack(heuristique_var, heuristique_val, i)) {
             return true;
         }
     }
@@ -287,19 +321,36 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine> const&, vecto
     return false;
 }
 
-bool Arbre_dom::backtrack(bt_heuristic heuristic) {
-    if (heuristic == bt_heuristic::varlargest) {
-        return backtrack(Arbre_dom::bt_largest_dom);
+bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic) {
+    int (*pheuristique_var)(std::vector<domaine> const&, vector<bool> const&);
+    if (var_heuristic == bt_heuristic_var::varlargest) {
+        pheuristique_var = Arbre_dom::bt_var_largest_dom;
     }
-    else if (heuristic == bt_heuristic::varsmallest) {
-        return backtrack(Arbre_dom::bt_smallest_dom);
+    else if (var_heuristic == bt_heuristic_var::varsmallest) {
+        pheuristique_var = Arbre_dom::bt_var_smallest_dom;
     }
-    else if (heuristic == bt_heuristic::varrandom) {
-        return backtrack(Arbre_dom::bt_random);
+    else if (var_heuristic == bt_heuristic_var::varrandom) {
+        pheuristique_var = Arbre_dom::bt_var_random;
     }
     else {
         throw runtime_error("Calling backtrack with non existent heuristic !");
     }
+
+    void (*pheuristique_val)(domaine &);
+    if (val_heuristic == bt_heuristic_val::vallargest) {
+        pheuristique_val = Arbre_dom::bt_val_largest;
+    }
+    else if (val_heuristic == bt_heuristic_val::valsmallest) {
+        pheuristique_val = Arbre_dom::bt_val_smallest;
+    }
+    else if (val_heuristic == bt_heuristic_val::valrandom) {
+        pheuristique_val = Arbre_dom::bt_val_random;
+    }
+    else {
+        throw runtime_error("Calling backtrack with non existent heuristic !");
+    }
+
+    return backtrack(pheuristique_var, pheuristique_val);
 }
 
 void Arbre_dom::delete_values(int var,std::vector<int>& values){

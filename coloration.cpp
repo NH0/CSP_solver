@@ -2,10 +2,11 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
-Coloration::Coloration(const string filename, const int k0) {
+Coloration::Coloration(string const filename, int const k0) {
 //    contraintes.clear();
     fstream file;
     try {
@@ -43,7 +44,7 @@ Coloration::Coloration(const string filename, const int k0) {
                         e1 = e3;
                     }
                     Contrainte c = Contrainte(e1, domaines[e1],e2, domaines[e2]);
-                    c.supprime_relations(1, domaines[e1],"-",2, domaines[e2],"!=",0);
+                    c.supprime_relations(1, domaines[e1],"-",1, domaines[e2],"!=",0);
                     contraintes.push_back(c);
                     contraintes_par_var[e1].push_back(contraintes.size() - 1);
                     contraintes_par_var[e2].push_back(contraintes.size() - 1);
@@ -51,7 +52,7 @@ Coloration::Coloration(const string filename, const int k0) {
                 }
             }
             file.close();
-            arbre = Arbre_dom(domaines, contraintes, contraintes_par_var,contraintes_communes);
+            arbre = Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
         }
         else {
             cerr << "Could not open file" << endl;
@@ -59,4 +60,32 @@ Coloration::Coloration(const string filename, const int k0) {
     }  catch (ios_base::failure e) {
         cerr << e.what();
     }
+}
+
+Coloration::Coloration(Coloration* col, int const k0) {
+    k = k0;
+    nb_var = col->nb_var;
+    domaines = col->domaines;
+    if (not is_sorted(domaines.begin(), domaines.end())) {
+        sort(domaines.begin(), domaines.end());
+    }
+    for (auto& domi : domaines) {
+        auto found = find_if(domi.begin(), domi.end(), [k0](int v) {return v >= k0;});
+        if (found != domi.end()) {
+            domi.resize(found - domi.begin());
+        }
+    }
+    contraintes = col->contraintes;
+    contraintes_par_var = col->contraintes_par_var;
+    contraintes_communes = col->contraintes_communes;
+    arbre = Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
+}
+
+int Coloration::solve_mincol() {
+    vector<int> sol = solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
+    if (not sol.empty()) {
+        Coloration new_col(this, k - 1);
+        return new_col.solve_mincol();
+    }
+    return k+1;
 }
