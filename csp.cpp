@@ -78,9 +78,9 @@ bool CSP::arc_consistance(){
     return true;
 }
 
-std::vector<int> CSP::solve(bt_heuristic heuristic) {
+std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic) {
     if(arc_consistance()) {
-        if(arbre.backtrack(heuristic)) {
+        if(arbre.backtrack(var_heuristic, val_heuristic)) {
             return arbre.get_solution();
         }
     }

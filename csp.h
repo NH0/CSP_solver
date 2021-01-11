@@ -24,7 +24,7 @@ public :
     CSP(){nb_var = 0; domaines={}; contraintes = {}; arbre = Arbre_dom(domaines, contraintes, contraintes_par_var);} // constructeur par défaut
 
     bool arc_consistance();
-    vector<int> solve(bt_heuristic heuristic);
+    vector<int> solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic);
 
 protected :
     Arbre_dom arbre;
