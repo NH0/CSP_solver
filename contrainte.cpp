@@ -1,4 +1,3 @@
-#include <stdexcept>
 #include "contrainte.h"
 
 using namespace std;
@@ -17,7 +16,7 @@ double Operation::apply(double a, double b) const{
         return a/b;
     }
     else {
-        throw std::invalid_argument(op);
+        throw invalid_argument(op);
     }
 }
 
@@ -44,20 +43,34 @@ bool Comparaison::apply(double a, double b) const{
         return (a == b or a == abs (b));
     }
     else {
-        throw std::invalid_argument(comp);
+        throw invalid_argument(comp);
     }
 }
 
-Contrainte::Contrainte(double c1, int i1, string o, double c2, int i2, string c, double v){
-    coef1 = c1;
-    var1 = i1;
-    coef2 = c2;
-    var2 = i2;
-    ope = Operation(o);
-    comp = Comparaison(c);
-    valeur = v;
+Contrainte::Contrainte(const int v1, const vector<int> dom1, const int v2, const vector<int> dom2){
+    var1 = v1;
+    var2 = v2;
+    for (auto i : dom1){
+        for (auto j : dom2){
+            c.insert(pair<int,int>{i,j});
+        }
+    }
+}
+
+void Contrainte::ajoute_relation(const int value1, const int value2){
+    c.insert(pair<int,int>(value1,value2)); // les sets n'ajoutent pas si ce n'est pas dedans
+}
+
+void Contrainte::supprime_relations(double coef1, const vector<int> dom1, string ope, double coef2, const vector<int> dom2, string compa, double valeur){
+    for (auto i : dom1){
+        for (auto j : dom2){
+            if (not Comparaison(compa).apply(Operation(ope).apply(coef1*i,coef2*j),valeur)){
+                c.erase(pair<int,int>{i,j});
+            }
+        }
+    }
 }
 
 bool Contrainte::satisfaite(const int v1, const int v2) const{
-    return(comp.apply(ope.apply(v1*coef1,v2*coef2),valeur));
+    return(c.find(pair<int,int>(v1,v2)) != c.end());
 }
