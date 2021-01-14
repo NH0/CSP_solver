@@ -9,7 +9,6 @@
 using namespace std;
 
 /*  T : Foward checking
- *  T : Faire des heuristiques pour le BT
  *  T : Economiser de l'espace en réordonnant les domaines au lieu de les dupliquer
  */
 

@@ -12,7 +12,9 @@ public:
     Coloration(std::string const filename, int const k);
     Coloration(Coloration* col, int const k);
 
-    int solve_mincol();
+    int get_k() const;
 };
+
+int solve_mincol(Coloration* col);
 
 #endif // COLORATION_H
