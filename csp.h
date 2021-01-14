@@ -25,6 +25,8 @@ public :
 
     vector<int> solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic);
 
+    void display_solution() const;
+
 protected :
     Arbre_dom arbre;
 };

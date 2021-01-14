@@ -14,6 +14,17 @@ std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val
     return {};
 }
 
+void CSP::display_solution() const {
+    vector<int> solution = arbre.get_solution();
+    if (solution.empty()) {
+        throw runtime_error("Solution empty !");
+    }
+    cout << "Solution : " << endl;
+    for (auto val : solution) {
+        cout << val << endl;
+    }
+}
+
 Reine::Reine(int n){
     nb_var = n;
 

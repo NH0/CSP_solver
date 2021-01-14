@@ -264,8 +264,8 @@ int main(){
 //    }
 //    cout << endl;
 //    cout << col.solve_mincol() << endl;
-    Coloration col2 = Coloration("../fpsol2.i.2.col", 32);
-    cout << solve_mincol(&col2) << endl;
+//    Coloration col2 = Coloration("../fpsol2.i.2.col", 32);
+    cout << solve_mincol("../fpsol2.i.2.col", 40) << endl;
 
 //    cout << "Nombre de domaines :" << col.domaines.size() << endl;
 //    for (int c= 0; c<col.contraintes.size(); c++){

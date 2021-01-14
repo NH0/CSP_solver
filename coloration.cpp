@@ -81,16 +81,25 @@ Coloration::Coloration(Coloration* col, int const k0) {
     arbre = Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
 }
 
+int Coloration::get_maxcol_val() const {
+    const vector<int>& solution = arbre.get_solution();
+    return *max_element(solution.begin(), solution.end());
+}
+
 int Coloration::get_k() const {
     return k;
 }
 
-int solve_mincol(Coloration* col) {
+int solve_mincol(string const filename, int const k0) {
+    Coloration* col = new Coloration(filename, k0);
     vector<int> sol = col->solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
-    if (not sol.empty()) {
-        clog << "New col with k = " << col->get_k() - 1 << endl;
-        Coloration new_col(col, col->get_k() - 1);
-        return solve_mincol(&new_col);
+    while (not sol.empty()) {
+        clog << "New col with k = " << col->get_maxcol_val() - 1 << endl;
+        Coloration* new_col = new Coloration(col, col->get_maxcol_val() - 1);
+        delete col;
+        sol = new_col->solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
+        new_col->display_solution();
+        col = new_col;
     }
     return col->get_k()+1;
 }
