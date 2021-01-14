@@ -257,9 +257,15 @@ CSP creation_csp(){
 int main(){
 //    test_arc_consistence_voitures();
 
-    Coloration col = Coloration("../thib.col", 10);
-    cout << col.solve_mincol() << endl;
-
+//    Coloration col = Coloration("../thib.col", 3);
+//    vector<int> sol = col.solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
+//    for (auto i : sol) {
+//        cout << i << " ";
+//    }
+//    cout << endl;
+//    cout << col.solve_mincol() << endl;
+//    Coloration col2 = Coloration("../fpsol2.i.2.col", 32);
+    cout << solve_mincol("../fpsol2.i.2.col", 40) << endl;
 
 //    cout << "Nombre de domaines :" << col.domaines.size() << endl;
 //    for (int c= 0; c<col.contraintes.size(); c++){
