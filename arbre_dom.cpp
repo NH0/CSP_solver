@@ -197,12 +197,12 @@ int sample_if_false(vector<bool> const& vec) {
     static random_device alea;
     static mt19937 gen(alea());
 
-    int nb_false = 0;
-    for (auto i : vec) {
-        if (!i) {
-            nb_false++;
-        }
+    if (vec.empty()) {
+        throw runtime_error("Empty sample !");
     }
+
+    int nb_false = count(vec.begin(), vec.end(), false);
+
     if (nb_false == 0) {
         throw runtime_error("Cannot sample vector : all variables are true");
     }
@@ -218,8 +218,7 @@ int sample_if_false(vector<bool> const& vec) {
             nb_false++;
         }
     }
-
-    throw runtime_error("Empty sample !");
+    return -1;
 }
 
 int Arbre_dom::bt_var_random(std::vector<domaine_end> const&) {
@@ -359,7 +358,6 @@ bool Arbre_dom::arc_consistence(){
         for (auto const &vx : domaines[test[0]]){
             bool support = true; // c'est le booléen qui nous aidera à determiner si une valeur de x à un support
             for (auto const &vy : domaines[test[1]]){
-                support = true;
                 int c = contraintes_communes[pair<int,int>(min(test[0],test[1]),max(test[0],test[1]))];
 
                 if (contraintes[c].var1==test[0]){
