@@ -20,14 +20,8 @@ bool reponse_oui_non(const string s){
 
 bool est_entier(const string s){
     int debut = 0;
-    while(s[debut]==' '){
-        debut +=1;
-    }
     if (s[debut] == '-'){
         debut = 1;
-        while (s[debut]==' '){
-            debut += 1;
-        }
     }
     for (int i=debut; i<s.size();i++){
         if (not (isdigit(s[i]) or s[i]==' ')){
@@ -39,18 +33,12 @@ bool est_entier(const string s){
 
 bool est_reel(const string s){
     int debut = 0;
-    while(s[debut]==' '){
-        debut +=1;
-    }
     if (s[debut] == '-'){
         debut = 1;
-        while (s[debut]==' '){
-            debut += 1;
-        }
     }
     int point = 0;
     for (int i=debut; i<s.size();i++){
-        if (not (isdigit(s[i]) or s[i]==' ' )){
+        if (not (isdigit(s[i]))){
             if (s[i]=='.'){
                 point += 1;
             }
@@ -65,11 +53,12 @@ bool est_reel(const string s){
 
 int reponse_entier(const string s){
     string rep = "rep";
-    bool b = est_entier(rep);
+    bool b = false;
     while (not b){
         cout << s << endl;
         cout << "Donnez un entier strictement positif" << endl;
         cin >> rep;
+        rep.erase(remove(rep.begin(), rep.end(), ' '), rep.end());
         b = est_entier(rep);
         if (b){
             b = stoi(rep) > 0;
@@ -84,6 +73,7 @@ int reponse_entier_relatif(const string s){
         cout << s << endl;
         cout << "Donnez un entier relatif (mettre un - devant l'entier s'il est négatif)" << endl;
         cin >> rep;
+        rep.erase(remove(rep.begin(), rep.end(), ' '), rep.end());
     }
     return stoi(rep);
 }
@@ -94,6 +84,7 @@ double reponse_reel(const string s){
         cout << s << endl;
         cout << "Donnez un reel (mettre un - pour dire qu'il est négatf et un . si il n'est pas entier" << endl;
         cin >> rep;
+        rep.erase(remove(rep.begin(), rep.end(), ' '), rep.end());
     }
     return stod(rep);
 }
@@ -117,7 +108,8 @@ vector<int> obtenir_domaine(){ // obtenir un domaine
     return dom;
 }
 
-void obtenir_domaine(vector<vector<int>> dom,int n){  // si les domaines sont identiques
+vector<vector<int>> obtenir_domaine(int n){  // si les domaines sont identiques
+    vector<vector<int>> dom;
     if (reponse_oui_non("Le domaine est-il un intervalle ?")){
         int debut, fin;
         debut = reponse_entier_relatif("Quel est le premier entier de l'intervalle ?");
@@ -138,6 +130,7 @@ void obtenir_domaine(vector<vector<int>> dom,int n){  // si les domaines sont id
             }
         }
     }
+    return dom;
 }
 
 
@@ -163,7 +156,7 @@ CSP creation_csp(){
     cout << "Nous allons commencer par la definition des domaines." << endl;
     csp.nb_var = reponse_entier("Combien votre probleme a t il de variables ?");
     if (reponse_oui_non("Les domaines sont-ils identiques ?")){
-        obtenir_domaine(csp.domaines,csp.nb_var);
+        csp.domaines = obtenir_domaine(csp.nb_var);
     }
     else{
         for (int i=0;i<csp.nb_var;i++){
@@ -224,13 +217,13 @@ CSP creation_csp(){
 
         double coef1 = reponse_reel("Quelle est la valeur du premier coefficient ?");
         string ope = "_";
-        while (ope == "*" or ope == "+" or ope == "-" or ope == "/"){
+        while (ope != "*" or ope != "+" or ope != "-" or ope != "/"){
             cout << "Tapez l'opérateur que vous souhaitez utiliser parmi : +, *, -, /" << endl;
             cin >> ope;
         }
         double coef2 = reponse_reel("Quelle est la valeur du second coefficient ?");
         string comp = "_";
-        while (comp == "=" or comp == "!=" or comp == "<=" or comp == ">=" or comp == "<" or comp == ">" or comp == "=|"){
+        while (comp != "=" or comp != "!=" or comp != "<=" or comp != ">=" or comp != "<" or comp != ">" or comp != "=|"){
             cout << "Tapez le comparateur que vous souhaitez utiliser parmi : =, !=, <=, >=, <, >, =| (égal à +/- la valeur) " << endl;
             cin >> comp;
         }
@@ -298,10 +291,7 @@ CSP creation_csp(){
 // Fin des fontions de l'interface
 
 int main(){
-    bool b = reponse_oui_non("Coucou");
-    int a = reponse_entier("Salut");
-    a = reponse_entier_relatif("Salut");
-    double d = reponse_reel("Bonjour");
+    CSP csp= creation_csp();
 
 //    Coloration col = Coloration("../thib.col", 10);
 //    cout << col.solve_mincol() << endl;
