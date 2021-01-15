@@ -40,6 +40,7 @@ private:
 
     bool var_satisfait_contraintes(int const var) const;
     bool contrainte_satisfiable(int const c) const;
+    bool contrainte_satisfiable(Contrainte const* const contrainte) const;
     bool contrainte_satisfiable(Contrainte const* const contrainte, int const val1) const;
     bool contraintes_satisfiables() const;
 
@@ -51,6 +52,12 @@ private:
     static void bt_val_largest(domaine & val_dom, domaine_end dom_end);
     static void bt_val_random(domaine & val_dom, domaine_end dom_end);
 
+    bool backtrack_loop(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
+                        bool enable_forwardcheck);
+    bool backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
+                   bool enable_forwardcheck);
+    bool backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
+                   int var_instanciee, bool enable_forwardcheck);
 
 public:
     Arbre_dom() : parent(nullptr) {nb_instanciee = 0;};
@@ -71,12 +78,10 @@ public:
 
     int get_nb_fils() const;
 
-    bool backtrack_loop(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end));
-    bool backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end));
-    bool backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end), int var_instanciee);
-    bool backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic);
+    bool backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, bool enable_forwarcheck = true);
 
     bool arc_consistence();
+    bool forward_checking(int const var_instanciee);
 
 };
 

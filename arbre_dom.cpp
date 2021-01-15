@@ -126,27 +126,22 @@ bool Arbre_dom::contrainte_satisfiable(Contrainte const* const contrainte, int c
     return false;
 }
 
-bool Arbre_dom::contrainte_satisfiable(int const c) const {
-    /**
-     * @brief Contrainte d'indice i est-elle satisfiable par instanciatin ?
-     */
-    Contrainte const contrainte = contraintes[c];
-    // Si la variable est instanciée
-    if (est_instanciee[contrainte.var1]) {
-        return contrainte_satisfiable(&contrainte, val_instanciation[contrainte.var1]);
+bool Arbre_dom::contrainte_satisfiable(Contrainte const* const contrainte) const {
+    if (est_instanciee[contrainte->var1]) {
+        return contrainte_satisfiable(contrainte, val_instanciation[contrainte->var1]);
     }
     else {
-        if (est_instanciee[contrainte.var2]) {
-            for (auto const &i : domaines[contrainte.var1]) {
-                if (contrainte.satisfaite(i, val_instanciation[contrainte.var2])) {
+        if (est_instanciee[contrainte->var2]) {
+            for (auto const &i : domaines[contrainte->var1]) {
+                if (contrainte->satisfaite(i, val_instanciation[contrainte->var2])) {
                     return true;
                 }
             }
         }
         else {
-            for (auto const &i : domaines[contrainte.var1]) {
-                for (auto const &j : domaines[contrainte.var2]) {
-                    if (contrainte.satisfaite(i, j)) {
+            for (auto const &i : domaines[contrainte->var1]) {
+                for (auto const &j : domaines[contrainte->var2]) {
+                    if (contrainte->satisfaite(i, j)) {
                         return true;
                     }
                 }
@@ -155,6 +150,15 @@ bool Arbre_dom::contrainte_satisfiable(int const c) const {
     }
 
     return false;
+}
+
+bool Arbre_dom::contrainte_satisfiable(int const c) const {
+    /**
+     * @brief Contrainte d'indice i est-elle satisfiable par instanciatin ?
+     */
+    Contrainte const contrainte = contraintes[c];
+    // Si la variable est instanciée
+    return contrainte_satisfiable(&contrainte);
 }
 
 bool Arbre_dom::contraintes_satisfiables() const {
@@ -245,7 +249,8 @@ void Arbre_dom::bt_val_random(domaine & val_dom, domaine_end val_dom_end) {
     random_shuffle(val_dom.begin(), val_dom_end);
 }
 
-bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end)) {
+bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
+                               bool enable_forwardcheck) {
     int i = heuristique_var(domaines_ends);
     heuristique_val(domaines[i], domaines_ends[i]);
     est_instanciee[i] = true;
@@ -263,7 +268,7 @@ bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> cons
         ajout_fils(nouv_domaines_ends);
         Arbre_dom* fil = get_dernier_fils();
 
-        if (fil->backtrack(heuristique_var, heuristique_val, i)) {
+        if (fil->backtrack(heuristique_var, heuristique_val, i, enable_forwardcheck)) {
             return true;
         }
     }
@@ -273,7 +278,8 @@ bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> cons
     return false;
 }
 
-bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end)) {
+bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
+                          bool enable_forwardcheck) {
     if (!contraintes_satisfiables()) {
         return false;
     }
@@ -281,10 +287,11 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), 
         solution = val_instanciation;
         return true;
     }
-    return backtrack_loop(heuristique_var, heuristique_val);
+    return backtrack_loop(heuristique_var, heuristique_val, enable_forwardcheck);
 }
 
-bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end), int var_instanciee) {
+bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
+                          int var_instanciee, bool enable_forwardcheck) {
 //    clog << "Starting BT with i = " << var_instanciee << endl;
     if (not(var_satisfait_contraintes(var_instanciee))) {
         return false;
@@ -296,10 +303,13 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), 
         }
         return false;
     }
-    return backtrack_loop(heuristique_var, heuristique_val);
+    if (enable_forwardcheck) {
+        forward_checking(var_instanciee);
+    }
+    return backtrack_loop(heuristique_var, heuristique_val, enable_forwardcheck);
 }
 
-bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic) {
+bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, bool enable_forwarcheck) {
     int (*pheuristique_var)(std::vector<domaine_end> const&);
     if (var_heuristic == bt_heuristic_var::varlargest) {
         pheuristique_var = Arbre_dom::bt_var_largest_dom;
@@ -328,7 +338,7 @@ bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_h
         throw runtime_error("Calling backtrack with non existent heuristic !");
     }
 
-    return backtrack(pheuristique_var, pheuristique_val);
+    return backtrack(pheuristique_var, pheuristique_val, enable_forwarcheck);
 }
 
 void Arbre_dom::delete_values(int var,std::vector<int>& values){
@@ -397,4 +407,31 @@ bool Arbre_dom::arc_consistence(){
         return false;
     }
     return true;
+}
+
+bool Arbre_dom::forward_checking(int const var_instanciee) {
+    bool has_removed = false;
+    for (int i = 0; i < contraintes_par_var[var_instanciee].size(); i++) {
+        int contraintei = contraintes_par_var[var_instanciee][i];
+        int var1 = contraintes[contraintei].var1;
+        int var2 = contraintes[contraintei].var2;
+        int other_var = var1 == var_instanciee ? var2 : var1;
+        vector<int> to_be_removed {};
+        for (int j = 0; j < (domaines_ends[other_var] - domaines[other_var].begin()); j++) {
+            int val1 = var1 == var_instanciee ? val_instanciation[var_instanciee] : domaines[other_var][j];
+            int val2 = var1 == var_instanciee ? domaines[other_var][j] : val_instanciation[var_instanciee];
+            if (not contraintes[contraintei].satisfaite(val1, val2)) {
+                // Do not remove immediatly to avoid errors during domain loop
+                to_be_removed.push_back(j);
+            }
+        }
+        if (not to_be_removed.empty()) {
+            has_removed = true;
+        }
+        for (int index = to_be_removed.size() - 1; index >= 0; index--) {
+            iter_swap(domaines_ends[other_var] - 1, domaines[other_var].begin() + index);
+            domaines_ends[other_var]--;
+        }
+    }
+    return has_removed;
 }

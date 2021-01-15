@@ -1,14 +1,18 @@
 #include <iostream>
+#include <chrono>
 #include "csp.h"
 
-std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic) {
-    if(arbre.arc_consistence()) {
-//        clog << "AC done, starting BT..." << endl;
-        if(arbre.backtrack(var_heuristic, val_heuristic)) {
-//            clog << "Backtrack true !" << endl;
-            return arbre.get_solution();
+std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, bool enable_AC, bool enable_forwardcheck) {
+    auto start = chrono::high_resolution_clock::now();
+    if (enable_AC) {
+        if(not arbre.arc_consistence()) {
+            return {};
         }
-//        clog << "Backtrack false" << endl;
+    }
+    if(arbre.backtrack(var_heuristic, val_heuristic, enable_forwardcheck)) {
+        auto stop = chrono::high_resolution_clock::now();
+        cout << "Solve time : " << chrono::duration_cast<chrono::milliseconds>(stop - start).count() << "ms" << endl;
+        return arbre.get_solution();
     }
 
     return {};
