@@ -38,7 +38,7 @@ Reine::Reine(int n){
     }
     for (int i = 0; i<n; i++){
         vector<int> domaine_i;
-        for (int j = i+1; j<n ;j++){
+        for (int j = 0; j<n ;j++){
             domaine_i.push_back(j);
         }
         domaines.push_back(domaine_i);
