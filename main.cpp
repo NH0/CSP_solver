@@ -293,41 +293,10 @@ CSP creation_csp(){
 int main(){
     CSP csp= creation_csp();
 
-
-//    Coloration col = Coloration("../thib.col", 10);
-//    cout << col.solve_mincol() << endl;
-
-
-//    Coloration col = Coloration("../thib.col", 3);
-//    vector<int> sol = col.solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
-//    for (auto i : sol) {
-//        cout << i << " ";
-//    }
-//    cout << endl;
-//    cout << col.solve_mincol() << endl;
-//    Coloration col2 = Coloration("../fpsol2.i.2.col", 32);
-//    cout << solve_mincol("../fpsol2.i.2.col", 40) << endl;
-
-
-//    cout << "Nombre de domaines :" << col.domaines.size() << endl;
-//    for (int c= 0; c<col.contraintes.size(); c++){
-//        cout << c << " eme contrainte : "   ;     cout << "var" << col.contraintes[c].var1 << "*" << col.contraintes[c].coef1 << col.contraintes[c].ope.op;
-//        cout << "var" << col.contraintes[c].var2 << "*" << col.contraintes[c].coef2 << col.contraintes[c].comp.comp;
-//        cout <<  col.contraintes[c].valeur << endl;
-//    }
-
-//    vector<vector<int>> domaines = {{1,2,30},{4,5,6}};
-//    Arbre_dom arbre = Arbre_dom(domaines);
-//    arbre.ajout_fils({{8,9},{10}});
-//    arbre.ajout_fils({{11,12},{13}});
-//    Arbre_dom fils = *arbre.get_dernier_fils();
-//    cout << "Dom : " << fils.get_domaines()[0][0] << endl;
-//    fils.ajout_fils({{50,51},{52,53,54}});
-//    Arbre_dom fils2 = *fils.get_dernier_fils();
-//    cout << "Dom : " << fils2.get_domaines()[1][1];
-//    arbre.retrait_dernier_fils();
-//    arbre.retrait_dernier_fils();
-//    cout << arbre.get_nb_fils()<< endl;
+//    cout << "Min number of colorations : " << solve_mincol("../thib.col", 10) + 1 << endl;
+//    cout << "Min number of colorations : " << solve_mincol("../fpsol2.i.2.col", 40) << endl;
+    Reine r = Reine(50);
+    r.solve(bt_heuristic_var::varsmallest, bt_heuristic_val::valsmallest, true, look_ahead::forward_checking);
 
     return 0;
 }

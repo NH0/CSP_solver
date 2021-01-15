@@ -97,8 +97,11 @@ int solve_mincol(string const filename, int const k0) {
         clog << "New col with k = " << col->get_maxcol_val() - 1 << endl;
         Coloration* new_col = new Coloration(col, col->get_maxcol_val() - 1);
         delete col;
-        sol = new_col->solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
-        new_col->display_solution();
+        try {
+            sol = new_col->solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
+        }  catch (runtime_error) {
+            return new_col->get_k() + 1;
+        }
         col = new_col;
     }
     return col->get_k()+1;
