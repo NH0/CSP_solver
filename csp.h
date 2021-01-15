@@ -21,9 +21,11 @@ public :
     vector<vector<int>> contraintes_par_var; // indice des contraintes par variable
     map<pair<int,int>,int> contraintes_communes; // dictionnaire qui liste les contraintes communes à i et j (i<j)
 
-    CSP(){nb_var = 0; domaines={}; contraintes = {}; arbre = Arbre_dom(domaines, contraintes, contraintes_par_var,contraintes_communes);} // constructeur par défaut
+    CSP() {nb_var = 0; arbre = Arbre_dom(domaines, contraintes, contraintes_par_var,contraintes_communes);} // constructeur par défaut
 
-    vector<int> solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic);
+    vector<int> solve(bt_heuristic_var var_heuristic = bt_heuristic_var::varrandom,
+                      bt_heuristic_val val_heuristic = bt_heuristic_val::valrandom,
+                      bool enable_AC = true, bool enable_forwardcheck = true);
 
     void display_solution() const;
 

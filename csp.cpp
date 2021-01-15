@@ -21,7 +21,7 @@ std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val
 void CSP::display_solution() const {
     vector<int> solution = arbre.get_solution();
     if (solution.empty()) {
-        throw runtime_error("Solution empty !");
+        cerr << "Solution empty !" << endl;
     }
     cout << "Solution : " << endl;
     for (auto val : solution) {

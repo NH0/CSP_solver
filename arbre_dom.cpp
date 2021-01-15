@@ -68,11 +68,7 @@ vector<int> const& Arbre_dom::get_instanciation() const {
 }
 
 vector<int> const& Arbre_dom::get_solution() const {
-    if (!solution.empty()) {
-        return solution;
-    }
-
-    throw runtime_error("La solution est vide !");
+    return solution;
 }
 
 void Arbre_dom::ajout_fils(Arbre_dom& fil) {
@@ -202,13 +198,15 @@ int sample_if_false(vector<bool> const& vec) {
     static mt19937 gen(alea());
 
     if (vec.empty()) {
-        throw runtime_error("Empty sample !");
+        cerr << "Sample_if_false : Empty sample !" << endl;
+        return -1;
     }
 
     int nb_false = count(vec.begin(), vec.end(), false);
 
     if (nb_false == 0) {
-        throw runtime_error("Cannot sample vector : all variables are true");
+        cerr << "Sample_if_false : Cannot sample vector all variables are true" << endl;
+        return -1;
     }
 
     uniform_int_distribution<> distrib(0, nb_false - 1);
@@ -226,7 +224,11 @@ int sample_if_false(vector<bool> const& vec) {
 }
 
 int Arbre_dom::bt_var_random(std::vector<domaine_end> const&) {
-    return sample_if_false(est_instanciee);
+    int index = sample_if_false(est_instanciee);
+    if (index != -1) {
+        return index;
+    }
+    throw runtime_error("Trying to backtrack while all var are instanciated");
 }
 
 void Arbre_dom::bt_val_smallest(domaine & val_dom, domaine_end val_dom_end) {
@@ -258,9 +260,7 @@ bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> cons
     for (auto j = 0; j<(domaines_ends[i] - domaines[i].begin()); j++) {
         vector<domaine_end> nouv_domaines_ends = domaines_ends;
         if (j > 0) {
-            int temp = domaines[i][0];
-            domaines[i][0] = domaines[i][j];
-            domaines[i][j] = temp;
+            iter_swap(domaines[i].begin(), domaines[i].begin() + j);
         }
         nouv_domaines_ends[i] = domaines[i].begin() + 1;
         val_instanciation[i] = domaines[i][0];
