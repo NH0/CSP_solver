@@ -331,19 +331,23 @@ bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_h
     return backtrack(pheuristique_var, pheuristique_val);
 }
 
-void Arbre_dom::delete_values(int var,std::vector<int>& values){
-    for (auto const val : values){
-        domaines[var].erase(remove(domaines[var].begin(), domaines[var].end(), val), domaines[var].end());
-    }
-}
-
-bool Arbre_dom::arc_consistence(){
+bool Arbre_dom::arc_consistence(int var){
     vector<vector<int>> aTester;
-    for (int i=0; i<nb_var;i++){
-        for (int j=i+1; j<nb_var;j++){
-            if (contraintes_communes.find(pair<int,int>(i,j)) !=contraintes_communes.end()){
-                aTester.push_back({i,j});
-                aTester.push_back({j,i});
+    if (var == -1){ // pour utiliser l'arc consistence dans l'arbre il faut avoir tester l'ac globalement avant
+        for (int i=0; i<nb_var;i++){
+            for (int j=i+1; j<nb_var;j++){
+                if (contraintes_communes.find(pair<int,int>(i,j)) !=contraintes_communes.end()){
+                    aTester.push_back({i,j});
+                    aTester.push_back({j,i});
+                }
+            }
+        }
+    }
+    else {
+        for (int i=0; i<nb_var;i++){
+            int m1 = min(i,var), m2 = max(i,var);
+            if (contraintes_communes.find(pair<int,int>(m1,m2)) !=contraintes_communes.end()){
+                aTester.push_back({i,var}); // seulement besoin de tester les variables en lien avec celle qu'on instancie
             }
         }
     }
@@ -355,7 +359,8 @@ bool Arbre_dom::arc_consistence(){
         aTester.pop_back();
         vector<int> aSupprimer; // c'est la liste des variables à supprimer du domaine
         // avec cette première boucle, nous testons si il existe un support pour chaque valeur de la variable x
-        for (auto const &vx : domaines[test[0]]){
+        for (int i=1; i < domaines[test[0]].size();i++){
+            int vx = domaines[test[0]][i];
             bool support = true; // c'est le booléen qui nous aidera à determiner si une valeur de x à un support
             for (auto const &vy : domaines[test[1]]){
                 int c = contraintes_communes[pair<int,int>(min(test[0],test[1]),max(test[0],test[1]))];
@@ -371,7 +376,7 @@ bool Arbre_dom::arc_consistence(){
                 }
             }
             if (not support){ // si l'on a pas de support : on doit supprimer vx
-                aSupprimer.push_back(vx);
+                aSupprimer.push_back(i);
             }
         }
         // si ce n'est pas le cas, on ajoute des nouvelles contraintes à tester
@@ -387,13 +392,16 @@ bool Arbre_dom::arc_consistence(){
                     }
                 }
             }
-            delete_values(test[0],aSupprimer);
+            for (int index = aSupprimer.size()-1; index >=0 ; index--){
+                iter_swap(domaines_ends[test[0]]-1,domaines[test[0]].begin()+index);
+                domaines_ends[test[0]] --;
+            }
         }
 
         empty_var = domaines[test[0]].empty();
     }
     if (empty_var){
-        cerr << "Probleme non realisable" << endl;
+        // cerr << "Probleme non realisable" << endl;
         return false;
     }
     return true;

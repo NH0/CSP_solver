@@ -2,7 +2,7 @@
 #include "csp.h"
 
 std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic) {
-    if(arbre.arc_consistence()) {
+    if(arbre.arc_consistence(-1)) {
 //        clog << "AC done, starting BT..." << endl;
         if(arbre.backtrack(var_heuristic, val_heuristic)) {
 //            clog << "Backtrack true !" << endl;

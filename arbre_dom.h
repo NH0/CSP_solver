@@ -62,8 +62,6 @@ public:
     std::vector<int> const& get_instanciation() const;
     std::vector<int> const& get_solution() const;
 
-    void delete_values(int var, std::vector<int>& values);
-
     void ajout_fils(Arbre_dom& fil);
     void ajout_fils(std::vector<domaine_end>& init_domaines_ends);
     void retrait_dernier_fils();
@@ -76,7 +74,7 @@ public:
     bool backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end), int var_instanciee);
     bool backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic);
 
-    bool arc_consistence();
+    bool arc_consistence(int var);
 
 };
 
