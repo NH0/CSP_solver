@@ -25,7 +25,7 @@ public :
 
     vector<int> solve(bt_heuristic_var var_heuristic = bt_heuristic_var::varrandom,
                       bt_heuristic_val val_heuristic = bt_heuristic_val::valrandom,
-                      bool enable_AC = true, bool enable_forwardcheck = true);
+                      bool enable_AC = true, look_ahead lookahead = look_ahead::forward_checking);
 
     void display_solution() const;
 

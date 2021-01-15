@@ -17,6 +17,12 @@ enum struct bt_heuristic_val {
     valrandom
 };
 
+enum struct look_ahead {
+    none,
+    forward_checking,
+    maintain_arc_consistency
+};
+
 class Arbre_dom {
     typedef std::vector<int> domaine;
     typedef std::vector<int>::iterator domaine_end;
@@ -53,11 +59,11 @@ private:
     static void bt_val_random(domaine & val_dom, domaine_end dom_end);
 
     bool backtrack_loop(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
-                        bool enable_forwardcheck);
+                        look_ahead lookahead);
     bool backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
-                   bool enable_forwardcheck);
+                   look_ahead lookahead);
     bool backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
-                   int var_instanciee, bool enable_forwardcheck);
+                   int var_instanciee, look_ahead lookahead);
 
 public:
     Arbre_dom() : parent(nullptr) {nb_instanciee = 0;};
@@ -78,7 +84,7 @@ public:
 
     int get_nb_fils() const;
 
-    bool backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, bool enable_forwarcheck = true);
+    bool backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, look_ahead lookahead);
 
     bool arc_consistence();
     bool forward_checking(int const var_instanciee);

@@ -2,14 +2,14 @@
 #include <chrono>
 #include "csp.h"
 
-std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, bool enable_AC, bool enable_forwardcheck) {
+std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, bool enable_AC, look_ahead lookahead) {
     auto start = chrono::high_resolution_clock::now();
     if (enable_AC) {
         if(not arbre.arc_consistence()) {
             return {};
         }
     }
-    if(arbre.backtrack(var_heuristic, val_heuristic, enable_forwardcheck)) {
+    if(arbre.backtrack(var_heuristic, val_heuristic, lookahead)) {
         auto stop = chrono::high_resolution_clock::now();
         cout << "Solve time : " << chrono::duration_cast<chrono::milliseconds>(stop - start).count() << "ms" << endl;
         return arbre.get_solution();

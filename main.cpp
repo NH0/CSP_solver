@@ -259,8 +259,8 @@ int main(){
 
 //    cout << "Min number of colorations : " << solve_mincol("../thib.col", 10) + 1 << endl;
 //    cout << "Min number of colorations : " << solve_mincol("../fpsol2.i.2.col", 40) << endl;
-    Reine r = Reine(100);
-    r.solve(bt_heuristic_var::varsmallest, bt_heuristic_val::valsmallest, true, false);
+    Reine r = Reine(50);
+    r.solve(bt_heuristic_var::varsmallest, bt_heuristic_val::valsmallest, true, look_ahead::forward_checking);
 
     return 0;
 }

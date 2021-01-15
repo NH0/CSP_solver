@@ -252,7 +252,7 @@ void Arbre_dom::bt_val_random(domaine & val_dom, domaine_end val_dom_end) {
 }
 
 bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
-                               bool enable_forwardcheck) {
+                               look_ahead lookahead) {
     int i = heuristique_var(domaines_ends);
     heuristique_val(domaines[i], domaines_ends[i]);
     est_instanciee[i] = true;
@@ -268,7 +268,7 @@ bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> cons
         ajout_fils(nouv_domaines_ends);
         Arbre_dom* fil = get_dernier_fils();
 
-        if (fil->backtrack(heuristique_var, heuristique_val, i, enable_forwardcheck)) {
+        if (fil->backtrack(heuristique_var, heuristique_val, i, lookahead)) {
             return true;
         }
     }
@@ -279,7 +279,7 @@ bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> cons
 }
 
 bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
-                          bool enable_forwardcheck) {
+                          look_ahead lookahead) {
     if (!contraintes_satisfiables()) {
         return false;
     }
@@ -287,11 +287,11 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), 
         solution = val_instanciation;
         return true;
     }
-    return backtrack_loop(heuristique_var, heuristique_val, enable_forwardcheck);
+    return backtrack_loop(heuristique_var, heuristique_val, lookahead);
 }
 
 bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
-                          int var_instanciee, bool enable_forwardcheck) {
+                          int var_instanciee, look_ahead lookahead) {
 //    clog << "Starting BT with i = " << var_instanciee << endl;
     if (not(var_satisfait_contraintes(var_instanciee))) {
         return false;
@@ -303,13 +303,16 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), 
         }
         return false;
     }
-    if (enable_forwardcheck) {
+    if (lookahead == look_ahead::forward_checking) {
         forward_checking(var_instanciee);
     }
-    return backtrack_loop(heuristique_var, heuristique_val, enable_forwardcheck);
+    else if (lookahead == look_ahead::maintain_arc_consistency) {
+        // maintain_ac(var_instanciee);
+    }
+    return backtrack_loop(heuristique_var, heuristique_val, lookahead);
 }
 
-bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, bool enable_forwarcheck) {
+bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, look_ahead lookahead) {
     int (*pheuristique_var)(std::vector<domaine_end> const&);
     if (var_heuristic == bt_heuristic_var::varlargest) {
         pheuristique_var = Arbre_dom::bt_var_largest_dom;
@@ -338,7 +341,7 @@ bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_h
         throw runtime_error("Calling backtrack with non existent heuristic !");
     }
 
-    return backtrack(pheuristique_var, pheuristique_val, enable_forwarcheck);
+    return backtrack(pheuristique_var, pheuristique_val, lookahead);
 }
 
 void Arbre_dom::delete_values(int var,std::vector<int>& values){
