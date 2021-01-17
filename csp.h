@@ -28,6 +28,7 @@ public :
                       bool enable_AC = true, look_ahead lookahead = look_ahead::forward_checking);
 
     void display_solution() const;
+    void display_tree_size() const;
 
 protected :
     Arbre_dom arbre;

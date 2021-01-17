@@ -90,6 +90,35 @@ Arbre_dom* Arbre_dom::get_dernier_fils() const {
     return fils.back();
 }
 
+int Arbre_dom::get_nb_leaves() const {
+    if (fils.size() == 0) {
+        return 1;
+    }
+    int fils_leaves = 0;
+    for (auto &fil : fils) {
+        fils_leaves += fil->get_nb_leaves();
+    }
+    return fils_leaves;
+}
+
+int Arbre_dom::get_nb_nodes() const {
+    if (fils.size() == 0) {
+        return 1;
+    }
+    int fils_nodes = 0;
+    for (auto &fil : fils) {
+        fils_nodes += fil->get_nb_nodes();
+    }
+    return 1 + fils_nodes;
+}
+
+void Arbre_dom::display_tree_size() const {
+    int nb_leaves = get_nb_leaves();
+    int nb_nodes = get_nb_nodes();
+    cout << "Number of nodes : " << nb_nodes << "\n"
+         << "Number of leaves : " << nb_leaves << endl;
+}
+
 int Arbre_dom::get_nb_fils() const {
     return fils.size();
 }
@@ -169,7 +198,7 @@ bool Arbre_dom::contraintes_satisfiables() const {
     return true;
 }
 
-int Arbre_dom::bt_var_smallest_dom(std::vector<domaine_end> const& domaines_ends) {
+int Arbre_dom::bt_var_smallest_dom(std::vector<domaine_end> const& domaines_ends, int) {
     int smallest = 0;
     int smallest_s = domaines_ends[0] - domaines[0].begin();
     for (int i = 0; i<domaines.size(); i++) {
@@ -181,7 +210,7 @@ int Arbre_dom::bt_var_smallest_dom(std::vector<domaine_end> const& domaines_ends
     return smallest;
 }
 
-int Arbre_dom::bt_var_largest_dom(std::vector<domaine_end> const& domaines_ends) {
+int Arbre_dom::bt_var_largest_dom(std::vector<domaine_end> const& domaines_ends, int) {
     int largest = 0;
     int largest_s = domaines_ends[0] - domaines[0].begin();
     for (int i = 0; i<domaines.size(); i++) {
@@ -223,12 +252,60 @@ int sample_if_false(vector<bool> const& vec) {
     return -1;
 }
 
-int Arbre_dom::bt_var_random(std::vector<domaine_end> const&) {
+int Arbre_dom::bt_var_random(std::vector<domaine_end> const&, int) {
     int index = sample_if_false(est_instanciee);
     if (index != -1) {
         return index;
     }
     throw runtime_error("Trying to backtrack while all var are instanciated");
+}
+
+int Arbre_dom::bt_var_constrained(std::vector<domaine_end> const&, int) {
+    // Choose var with highest number of constraints
+    int nb_constraints = 0;
+    int var = 0;
+    for (auto v = 0; v<nb_var; v++) {
+        if (contraintes_par_var[v].size() > nb_constraints) {
+            nb_constraints = contraintes_par_var[v].size();
+            var = v;
+        }
+    }
+    return var;
+}
+
+int Arbre_dom::bt_var_relaxed(std::vector<domaine_end> const&, int) {
+    // Choose the var with the smallest number of constraints
+    int nb_contraints = contraintes_par_var[0].size();
+    int var = 0;
+    for (auto v = 1; v<nb_var; v++) {
+        if (contraintes_par_var[v].size() < nb_contraints) {
+            nb_contraints = contraintes_par_var[v].size();
+            var = v;
+        }
+    }
+    return var;
+}
+
+int Arbre_dom::bt_var_linked(std::vector<domaine_end> const&, int var_instanciee) {
+    // Choose the first non instanciated variable in the set of vars linked to the last instanciated var by a constraint.
+    // If none, choose the first (in terms of index) non instanciated.
+    if (var_instanciee == -1) {
+        return 0;
+    }
+    int c = 0;
+    Contrainte* con = &contraintes[contraintes_par_var[var_instanciee][c]];
+    int other_var = con->var1 == var_instanciee ? con->var2 : con->var1;
+
+    while (c < contraintes_par_var[var_instanciee].size() && est_instanciee[other_var]) {
+        c++;
+        con = &contraintes[contraintes_par_var[var_instanciee][c]];
+        other_var = con->var1 == var_instanciee ? con->var2 : con->var1;
+    }
+    if (c < contraintes_par_var[var_instanciee].size()) {
+        return other_var;
+    }
+    // First non instanciated variable
+    return find(est_instanciee.begin(), est_instanciee.end(), false) - est_instanciee.begin();
 }
 
 void Arbre_dom::bt_val_smallest(domaine & val_dom, domaine_end val_dom_end) {
@@ -251,9 +328,9 @@ void Arbre_dom::bt_val_random(domaine & val_dom, domaine_end val_dom_end) {
     random_shuffle(val_dom.begin(), val_dom_end);
 }
 
-bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
-                               look_ahead lookahead) {
-    int i = heuristique_var(domaines_ends);
+bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end),
+                               look_ahead lookahead, int var_instanciee) {
+    int i = heuristique_var(domaines_ends, var_instanciee);
     heuristique_val(domaines[i], domaines_ends[i]);
     est_instanciee[i] = true;
     nb_instanciee++;
@@ -278,7 +355,7 @@ bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> cons
     return false;
 }
 
-bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
+bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end),
                           look_ahead lookahead) {
     if (!contraintes_satisfiables()) {
         return false;
@@ -290,7 +367,7 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), 
     return backtrack_loop(heuristique_var, heuristique_val, lookahead);
 }
 
-bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), void heuristique_val(domaine &, domaine_end),
+bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end),
                           int var_instanciee, look_ahead lookahead) {
 //    clog << "Starting BT with i = " << var_instanciee << endl;
     if (not(var_satisfait_contraintes(var_instanciee))) {
@@ -309,11 +386,11 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&), 
     else if (lookahead == look_ahead::maintain_arc_consistency) {
         // maintain_ac(var_instanciee);
     }
-    return backtrack_loop(heuristique_var, heuristique_val, lookahead);
+    return backtrack_loop(heuristique_var, heuristique_val, lookahead, var_instanciee);
 }
 
 bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, look_ahead lookahead) {
-    int (*pheuristique_var)(std::vector<domaine_end> const&);
+    int (*pheuristique_var)(std::vector<domaine_end> const&, int);
     if (var_heuristic == bt_heuristic_var::varlargest) {
         pheuristique_var = Arbre_dom::bt_var_largest_dom;
     }
@@ -322,6 +399,15 @@ bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_h
     }
     else if (var_heuristic == bt_heuristic_var::varrandom) {
         pheuristique_var = Arbre_dom::bt_var_random;
+    }
+    else if (var_heuristic == bt_heuristic_var::varconstrained) {
+        pheuristique_var = Arbre_dom::bt_var_constrained;
+    }
+    else if (var_heuristic == bt_heuristic_var::varrelaxed) {
+        pheuristique_var = Arbre_dom::bt_var_relaxed;
+    }
+    else if (var_heuristic == bt_heuristic_var::varlinked) {
+        pheuristique_var = Arbre_dom::bt_var_linked;
     }
     else {
         throw runtime_error("Calling backtrack with non existent heuristic !");

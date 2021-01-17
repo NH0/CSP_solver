@@ -13,6 +13,9 @@ launch.json
 *.dat
 *.png
 
+# Ignore images
+*.png
+
 # Ignore builds and cache
 build
 .cache
