@@ -1,28 +1,36 @@
 #include <iostream>
+#include <chrono>
 #include "csp.h"
 
-std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic) {
-    if(arbre.arc_consistence()) {
-//        clog << "AC done, starting BT..." << endl;
-        if(arbre.backtrack(var_heuristic, val_heuristic)) {
-//            clog << "Backtrack true !" << endl;
-            return arbre.get_solution();
+std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, bool enable_AC, look_ahead lookahead) {
+    auto start = chrono::high_resolution_clock::now();
+    if (enable_AC) {
+        if(not arbre.arc_consistence()) {
+            return {};
         }
-//        clog << "Backtrack false" << endl;
     }
-
+    if(arbre.backtrack(var_heuristic, val_heuristic, lookahead)) {
+        auto stop = chrono::high_resolution_clock::now();
+        cout << "Solve time : " << chrono::duration_cast<chrono::milliseconds>(stop - start).count() << "ms" << endl;
+        return arbre.get_solution();
+    }
+    cout << "No solution" << endl;
     return {};
 }
 
 void CSP::display_solution() const {
     vector<int> solution = arbre.get_solution();
     if (solution.empty()) {
-        throw runtime_error("Solution empty !");
+        cerr << "Solution empty !" << endl;
     }
     cout << "Solution : " << endl;
     for (auto val : solution) {
         cout << val << endl;
     }
+}
+
+void CSP::display_tree_size() const {
+    arbre.display_tree_size();
 }
 
 Reine::Reine(int n){
@@ -34,7 +42,7 @@ Reine::Reine(int n){
     }
     for (int i = 0; i<n; i++){
         vector<int> domaine_i;
-        for (int j = i+1; j<n ;j++){
+        for (int j = 0; j<n ;j++){
             domaine_i.push_back(j);
         }
         domaines.push_back(domaine_i);
