@@ -526,7 +526,7 @@ bool Arbre_dom::forward_checking(int const var_instanciee) {
             has_removed = true;
         }
         for (int index = to_be_removed.size() - 1; index >= 0; index--) {
-            iter_swap(domaines_ends[other_var] - 1, domaines[other_var].begin() + index);
+            iter_swap(domaines_ends[other_var] - 1, domaines[other_var].begin() + to_be_removed[index]);
             domaines_ends[other_var]--;
         }
     }
