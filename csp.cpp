@@ -5,7 +5,7 @@
 std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, bool enable_AC, look_ahead lookahead) {
     auto start = chrono::high_resolution_clock::now();
     if (enable_AC) {
-        if(not arbre.arc_consistence()) {
+        if(not arbre.arc_consistence(-1)) {
             return {};
         }
     }

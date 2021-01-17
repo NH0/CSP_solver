@@ -61,6 +61,20 @@ void Contrainte::ajoute_relation(const int value1, const int value2){
     c.insert(pair<int,int>(value1,value2)); // les sets n'ajoutent pas si ce n'est pas dedans
 }
 
+void Contrainte::supprime_relation(const int value1, const int value2){
+    c.erase(pair<int,int>(value1,value2)); // pas de pbs non plus
+}
+
+void Contrainte::ajoute_relations(double coef1, const vector<int> dom1, string ope, double coef2, const vector<int> dom2, string compa, double valeur){
+    for (auto i : dom1){
+        for (auto j : dom2){
+            if (Comparaison(compa).apply(Operation(ope).apply(coef1*i,coef2*j),valeur)){
+                c.insert(pair<int,int>{i,j});
+            }
+        }
+    }
+}
+
 void Contrainte::supprime_relations(double coef1, const vector<int> dom1, string ope, double coef2, const vector<int> dom2, string compa, double valeur){
     for (auto i : dom1){
         for (auto j : dom2){
