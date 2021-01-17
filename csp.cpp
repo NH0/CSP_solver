@@ -14,7 +14,7 @@ std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val
         cout << "Solve time : " << chrono::duration_cast<chrono::milliseconds>(stop - start).count() << "ms" << endl;
         return arbre.get_solution();
     }
-
+    cout << "No solution" << endl;
     return {};
 }
 
@@ -27,6 +27,10 @@ void CSP::display_solution() const {
     for (auto val : solution) {
         cout << val << endl;
     }
+}
+
+void CSP::display_tree_size() const {
+    arbre.display_tree_size();
 }
 
 Reine::Reine(int n){
