@@ -384,7 +384,10 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&, i
         forward_checking(var_instanciee);
     }
     else if (lookahead == look_ahead::maintain_arc_consistency) {
-        // maintain_ac(var_instanciee);
+        bool solvable = arc_consistence(var_instanciee);
+        if (not solvable) {
+            return false;
+        }
     }
     return backtrack_loop(heuristique_var, heuristique_val, lookahead, var_instanciee);
 }
