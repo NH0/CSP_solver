@@ -495,7 +495,7 @@ bool Arbre_dom::arc_consistence(int var){
                 }
             }
             for (int index = aSupprimer.size()-1; index >=0 ; index--){
-                iter_swap(domaines_ends[test[0]]-1,domaines[test[0]].begin()+index);
+                iter_swap(domaines_ends[test[0]]-1,domaines[test[0]].begin()+aSupprimer[index]);
                 domaines_ends[test[0]] --;
             }
         }
