@@ -3,6 +3,7 @@
 #include "csp.h"
 #include "coloration.h"
 #include "arbre_dom.h"
+#include "build_in_problems.h"
 
 using namespace std;
 
@@ -291,13 +292,36 @@ CSP creation_csp(){
 // Fin des fontions de l'interface
 
 int main(){
-    CSP csp= creation_csp();
+    vector<vector<int>> weights = {{31,10,20,19,4,3,6},{41,50,49,59,55,57,60}};
+    vector<int> values = {70,20,39,37,7,5,10};
+    vector<int> Wmax = {50,170};
+
+    int B = calcul_glouton_knapsack(values,weights,Wmax);
+
+    cout << B << endl;
+
+    Knapsack k = Knapsack(values,weights,Wmax,B);
+
+    vector<int> sol = k.solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
+
+    for (auto s : sol){
+        cout << s << ",";
+    }
+
+//    vector<int> sol = solve_knapsack(values,weights,Wmax);
+
+
 
 //    cout << "Min number of colorations : " << solve_mincol("../thib.col", 10) + 1 << endl;
 //    cout << "Min number of colorations : " << solve_mincol("../fpsol2.i.2.col", 40) << endl;
+<<<<<<< Updated upstream
     Reine r = Reine(4);
     r.solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, true, look_ahead::forward_checking);
     r.display_tree_size();
+=======
+//    Reine r = Reine(50);
+//    r.solve(bt_heuristic_var::varsmallest, bt_heuristic_val::valsmallest, true, look_ahead::forward_checking);
+>>>>>>> Stashed changes
 
     return 0;
 }
