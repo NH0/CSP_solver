@@ -4,21 +4,22 @@ Knapsack::Knapsack(std::vector<int> values,std::vector<vector<int>> weights, vec
     nb_var = values.size();
     w = weights;
     v = values;
-    B_inf = Borne;
     max = 0;
     dt = values[0];
     for (int i=0; i < nb_var;i++){
-        max += values[i];
+        max += v[i];
         domaines.push_back({0,1});
         contraintes_par_var.push_back({});
         for (int j=i+1; j < nb_var;j++){
-            dt = min(dt,abs(values[i]-values[j]));
+            if (v[i] != v[j]){
+                dt = min(dt,abs(values[i]-values[j]));
+            }
         }
     }
 
     domaines.push_back({});
     contraintes_par_var.push_back({});
-    for (int i=0;i < pow(2,values.size());i++){
+    for (int i=0;i < pow(2,v.size());i++){
         bool b = value_criteria(i,v)>=Borne;
         for (int j=0; j<w.size();j++){
             b = b and value_criteria(i,w[j])<=Wmax[j];
@@ -37,7 +38,7 @@ Knapsack::Knapsack(std::vector<int> values,std::vector<vector<int>> weights, vec
         }
         contraintes.push_back(c);
         contraintes_par_var[i].push_back(contraintes.size()-1);
-        contraintes_par_var[nb_var-2].push_back(contraintes.size()-1);
+        contraintes_par_var[nb_var-1].push_back(contraintes.size()-1);
         contraintes_communes.insert(pair<pair<int,int>,int>({i,nb_var-1},contraintes.size() - 1));
     }
 
@@ -51,7 +52,6 @@ Knapsack::Knapsack(Knapsack* knapsack,int B){
     dt = knapsack->dt;
     v = knapsack->v;
     w = knapsack->w;
-    B_inf = knapsack->B_inf;
     contraintes = knapsack->contraintes;
     contraintes_par_var = knapsack->contraintes_par_var;
     contraintes_communes = knapsack->contraintes_communes;
@@ -66,7 +66,8 @@ Knapsack::Knapsack(Knapsack* knapsack,int B){
         else{
             for (auto c : contraintes_par_var[contraintes_par_var.size()-1]){
                 int i = contraintes[c].var1;
-                contraintes[c].supprime_relation(i,d);
+                int power = pow(2,i);
+                contraintes[c].supprime_relation(d/power % 2,d);
             }
         }
     }
@@ -87,7 +88,7 @@ int value_criteria(int bin,vector<int> v){
 
 int Knapsack::get_value_solution(std::vector<int> s){
     int val = 0;
-    for (int i = 0; i< nb_var-2;i++){
+    for (int i = 0; i< nb_var-1;i++){
         val += v[i]*s[i];
     }
     return(val);
@@ -97,26 +98,14 @@ vector<int> solve_knapsack(std::vector<int> v,std::vector<vector<int>> w, std::v
     int B_inf = calcul_glouton_knapsack(v,w,Wmax);
 
     Knapsack* knapsack = new Knapsack(v,w,Wmax,B_inf);
-    vector<int> sol = knapsack->solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
+    vector<int> sol;
 
-    bool b = true;
-
-    while (b) {
+    while (not knapsack->domaines[knapsack->nb_var-1].empty()) {
+        //sol = knapsack->solve(bt_heuristic_var::varlargest, bt_heuristic_val::vallargest, false, look_ahead::forward_checking);
+        sol = knapsack->solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, false, look_ahead::forward_checking);
         B_inf = knapsack->get_value_solution(sol);
-        Knapsack* new_knapsack = new Knapsack(knapsack,B_inf+knapsack->dt);
-        vector<int> new_sol = new_knapsack->solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
-
-        if (new_sol.empty()){
-            b = false;
-        }
-        else{
-            sol = new_sol;
-            delete knapsack;
-            knapsack = new_knapsack;
-        }
+        knapsack = new Knapsack(knapsack,B_inf+knapsack->dt);
     }
-
-    sol.pop_back();
 
     return sol;
 }
