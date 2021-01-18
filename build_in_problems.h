@@ -15,5 +15,6 @@ public:
 };
 
 int value_criteria(int bin,vector<int> v);
-vector<int> solve_knapsack(std::vector<int> v,std::vector<vector<int>> w, std::vector<int> Wmax);
+vector<int> solve_max_knapsack(std::vector<int> v,std::vector<vector<int>> w, std::vector<int> Wmax);
 int calcul_glouton_knapsack(std::vector<int> v,std::vector<vector<int>> w, std::vector<int> Wmax);
+void knapsack_problems(int n, vector<int> &v, vector<vector<int>> &w, vector<int> &W);
