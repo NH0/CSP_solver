@@ -136,15 +136,35 @@ vector<vector<int>> obtenir_domaine(int n){  // si les domaines sont identiques
 
 bt_heuristic_val get_heuristic_val(){
     cout << "Vous allez selectionner une heuristique de selection de valeur parmi : " ;
+    cout << "- choix de la plus petite valeur" << endl;
+    cout << "- choix de la plus grande valeur" << endl;
+    cout << "- choix de la valeur la moins supportee" << endl;
+    cout << "- choix de la valeur la plus supportee" << endl;
+    cout << "- choix de la valeur la moins filtrante" << endl;
+    cout << "- choix de la valeur la plus filtrante" << endl;
+    cout << "- choix d'une valeur au hasard" << endl;
     cout << " choix de la plus petite valeur, choix de la plus grande valeur, choix aléatoire de la valeur";
+
     if (reponse_oui_non("Voulez-vous l'heuristique de selection de la plus petite valeur ?")){
-        return(bt_heuristic_val::valsmallest);
+        return(bt_heuristic_val::smallest);
     }
     if (reponse_oui_non("Voulez-vous l'heuristique de selection de la plus grande valeur ?")){
-        return(bt_heuristic_val::vallargest);
+        return(bt_heuristic_val::largest);
+    }
+    if (reponse_oui_non("Voulez-vous l'heuristique de selection de la valeur la moins supportee ?")){
+        return(bt_heuristic_val::least_supported);
+    }
+    if (reponse_oui_non("Voulez-vous l'heuristique de selection de la valeur la plus supportee ?")){
+        return(bt_heuristic_val::most_supported);
+    }
+    if (reponse_oui_non("Voulez-vous l'heuristique de selection de la valeur la moins filtrante ?")){
+        return(bt_heuristic_val::fewest_filtration);
+    }
+    if (reponse_oui_non("Voulez-vous l'heuristique de selection de la valeur la plus filtrante ?")){
+        return(bt_heuristic_val::most_filtration);
     }
     cout << "Ce sera la methode de selection aleatoire" << endl;
-    return(bt_heuristic_val::valrandom);
+    return(bt_heuristic_val::random);
 }
 
 bt_heuristic_var get_heuristic_var(){
@@ -157,22 +177,22 @@ bt_heuristic_var get_heuristic_var(){
     cout << "- choix d'une variable au hasard" << endl;
 
     if (reponse_oui_non("Voulez-vous l'heuristique de selection de la / d'une des variables ayant le plus petit domaine ?")){
-        return(bt_heuristic_var::varsmallest);
+        return(bt_heuristic_var::smallest_domain);
     }
     if (reponse_oui_non("Voulez-vous l'heuristique de selection de la / d'une des variables ayant le plus grand domaine ?")){
-        return(bt_heuristic_var::varlargest);
+        return(bt_heuristic_var::largest_domain);
     }
     if (reponse_oui_non("Voulez-vous l'heuristique de selection de la / d'une des variables ayant le moins de contraintes ?")){
-        return(bt_heuristic_var::varrelaxed);
+        return(bt_heuristic_var::least_constraints);
     }
     if (reponse_oui_non("Voulez-vous l'heuristique de selection de la / d'une des variables ayant le plus de contraintes ?")){
-        return(bt_heuristic_var::varconstrained);
+        return(bt_heuristic_var::most_constraints);
     }
     if (reponse_oui_non("Voulez-vous l'heuristique de selection d'une variable liée à la variable qui vient d'etre instanciee ?")){
-        return(bt_heuristic_var::varlinked);
+        return(bt_heuristic_var::linked_to_previous_var);
     }
     cout << "Ce sera la methode de selection aleatoire" << endl;
-    return(bt_heuristic_var::varrandom);
+    return(bt_heuristic_var::random);
 
 }
 
@@ -207,7 +227,7 @@ void interface(){
         else if (reponse_oui_non("Voulez-vous resoudre le probleme des reines ?")){
             int nb_reines = reponse_entier("Combien de reines ?");
             Reine r = Reine(nb_reines);
-            vector<int> sol = r.solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, true, look_ahead::forward_checking);
+            vector<int> sol = r.solve(bt_heuristic_var::largest_domain, bt_heuristic_val::largest, true, look_ahead::forward_checking);
             r.display_solution();
         }
         else if (reponse_oui_non("Voulez-vous resoudre un knapsack (multidimensionnel) ?")){
@@ -449,37 +469,23 @@ int main(){
 
     knapsack_problems(8,values,weights,Wmax);
 
-    int B = calcul_glouton_knapsack(values,weights,Wmax);
+    vector<int> sol = solve_knapsack(values,weights,Wmax);
 
-    Knapsack* k = new Knapsack(values,weights,Wmax,B);
+    for (int s=0 ;s < sol.size();s++){
+        if (s == sol.size() -1){
+            cout << "Solution : " << value_criteria(sol[s],values);
+        }
+        else{
+            cout << sol[s] << endl;
+        }
 
-//    vector<int> sol = k->solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, false, look_ahead::forward_checking);
-
-//    k->display_tree_size();
-
-//    k = new Knapsack(k,k->get_value_solution(sol)+k->dt);
-
-//    sol = k->solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, false, look_ahead::forward_checking);
-
-//    k->display_tree_size();
-
-//    vector<int> sol = solve_knapsack(values,weights,Wmax);
-
-//    for (int s=0 ;s < sol.size();s++){
-//        if (s == sol.size() -1){
-//            cout << "Solution : " << value_criteria(sol[s],values);
-//        }
-//        else{
-//            cout << sol[s] << endl;
-//        }
-
-//    }
-//    cout << endl;
+    }
+    cout << endl;
 
 //    cout << "Min number of colorations : " << solve_mincol("../thib.col", 10) + 1 << endl;
 //    cout << "Min number of colorations : " << solve_mincol("../fpsol2.i.2.col", 40) << endl;
 //
-    Reine r = Reine(8);
+//    Reine r = Reine(8);
 //    r.solve(bt_heuristic_var::smallest_domain, bt_heuristic_val::smallest, true, look_ahead::maintain_arc_consistency);
 //    r.display_tree_size();
 //    r.display_solution();
