@@ -102,7 +102,7 @@ vector<int> solve_knapsack(std::vector<int> v,std::vector<vector<int>> w, std::v
 
     while (not knapsack->domaines[knapsack->nb_var-1].empty()) {
         //sol = knapsack->solve(bt_heuristic_var::varlargest, bt_heuristic_val::vallargest, false, look_ahead::forward_checking);
-        sol = knapsack->solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, false, look_ahead::forward_checking);
+        sol = knapsack->solve(bt_heuristic_var::largest_domain, bt_heuristic_val::largest, false, look_ahead::forward_checking);
         B_inf = knapsack->get_value_solution(sol);
         knapsack = new Knapsack(knapsack,B_inf+knapsack->dt);
     }
