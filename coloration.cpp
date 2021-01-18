@@ -92,13 +92,13 @@ int Coloration::get_k() const {
 
 int solve_mincol(string const filename, int const k0) {
     Coloration* col = new Coloration(filename, k0);
-    vector<int> sol = col->solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
+    vector<int> sol = col->solve(bt_heuristic_var::largest_domain, bt_heuristic_val::smallest);
     while (not sol.empty()) {
         clog << "New col with k = " << col->get_maxcol_val() - 1 << endl;
         Coloration* new_col = new Coloration(col, col->get_maxcol_val() - 1);
         delete col;
         try {
-            sol = new_col->solve(bt_heuristic_var::varlargest, bt_heuristic_val::valsmallest);
+            sol = new_col->solve(bt_heuristic_var::largest_domain, bt_heuristic_val::smallest);
         }  catch (runtime_error) {
             return new_col->get_k() + 1;
         }

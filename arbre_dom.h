@@ -6,12 +6,12 @@
 #include "contrainte.h"
 
 enum struct bt_heuristic_var {
-    varlargest,
-    varsmallest,
-    varrandom,
-    varconstrained,
-    varrelaxed,
-    varlinked
+    largest_domain,
+    smallest_domain,
+    random,
+    most_constraints,
+    least_constraints,
+    linked_to_previous_var
 };
 
 enum struct bt_heuristic_val {

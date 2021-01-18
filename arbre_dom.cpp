@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <iterator>
 #include <random>
+#include <utility>
 #include "arbre_dom.h"
 
 using namespace std;
@@ -199,25 +200,47 @@ bool Arbre_dom::contraintes_satisfiables() const {
 }
 
 int Arbre_dom::bt_var_smallest_dom(std::vector<domaine_end> const& domaines_ends, int) {
-    int smallest = 0;
-    int smallest_s = domaines_ends[0] - domaines[0].begin();
+    int smallest = -1;
+    int smallest_s = -1;
     for (int i = 0; i<domaines.size(); i++) {
-        if (not(est_instanciee[i]) && (domaines_ends[i] - domaines[i].begin()) < smallest_s) {
-            smallest = i;
-            smallest_s = domaines_ends[i] - domaines[i].begin();
+        if (not(est_instanciee[i])) {
+            if (smallest == -1) {
+                smallest = i;
+                smallest_s = domaines_ends[i] - domaines[i].begin();
+            }
+            else {
+                if ((domaines_ends[i] - domaines[i].begin()) < smallest_s) {
+                smallest = i;
+                smallest_s = domaines_ends[i] - domaines[i].begin();
+                }
+            }
         }
+    }
+    if (smallest == -1) {
+        throw runtime_error("Trying to select a variable to initialize, but all variables are initialized !");
     }
     return smallest;
 }
 
 int Arbre_dom::bt_var_largest_dom(std::vector<domaine_end> const& domaines_ends, int) {
-    int largest = 0;
-    int largest_s = domaines_ends[0] - domaines[0].begin();
+    int largest = -1;
+    int largest_s = -1;
     for (int i = 0; i<domaines.size(); i++) {
-        if (not(est_instanciee[i]) && (domaines_ends[i] - domaines[i].begin()) > largest_s) {
-            largest = i;
-            largest_s = domaines_ends[i] - domaines[i].begin();
+        if (not(est_instanciee[i])) {
+            if (largest == -1) {
+                largest = i;
+                largest_s = domaines_ends[i] - domaines[i].begin();
+            }
+            else {
+                if ((domaines_ends[i] - domaines[i].begin()) > largest_s) {
+                largest = i;
+                largest_s = domaines_ends[i] - domaines[i].begin();
+                }
+            }
         }
+    }
+    if (largest == -1) {
+        throw runtime_error("Trying to select a variable to initialize, but all variables are initialized !");
     }
     return largest;
 }
@@ -257,31 +280,55 @@ int Arbre_dom::bt_var_random(std::vector<domaine_end> const&, int) {
     if (index != -1) {
         return index;
     }
-    throw runtime_error("Trying to backtrack while all var are instanciated");
+    throw runtime_error("Trying to select a variable to initialize, but all variables are initialized !");
 }
 
 int Arbre_dom::bt_var_constrained(std::vector<domaine_end> const&, int) {
     // Choose var with highest number of constraints
-    int nb_constraints = 0;
-    int var = 0;
+    int nb_constraints = -1;
+    int var = -1;
     for (auto v = 0; v<nb_var; v++) {
-        if (contraintes_par_var[v].size() > nb_constraints) {
-            nb_constraints = contraintes_par_var[v].size();
-            var = v;
+        if (not(est_instanciee[v])) {
+            if (var == -1) {
+                var = v;
+                nb_constraints = contraintes_par_var[v].size();
+            }
+            else {
+                if (contraintes_par_var[v].size() > nb_constraints) {
+                    nb_constraints = contraintes_par_var[v].size();
+                    var = v;
+                }
+            }
         }
+
+    }
+    if (var == -1) {
+        throw runtime_error("Trying to select a variable to initialize, but all variables are initialized !");
     }
     return var;
 }
 
 int Arbre_dom::bt_var_relaxed(std::vector<domaine_end> const&, int) {
     // Choose the var with the smallest number of constraints
-    int nb_contraints = contraintes_par_var[0].size();
-    int var = 0;
-    for (auto v = 1; v<nb_var; v++) {
-        if (contraintes_par_var[v].size() < nb_contraints) {
-            nb_contraints = contraintes_par_var[v].size();
-            var = v;
+    int nb_constraints = -1;
+    int var = -1;
+    for (auto v = 0; v<nb_var; v++) {
+        if (not(est_instanciee[v])) {
+            if (var == -1) {
+                var = v;
+                nb_constraints = contraintes_par_var[v].size();
+            }
+            else {
+                if (contraintes_par_var[v].size() < nb_constraints) {
+                    nb_constraints = contraintes_par_var[v].size();
+                    var = v;
+                }
+            }
         }
+
+    }
+    if (var == -1) {
+        throw runtime_error("Trying to select a variable to initialize, but all variables are initialized !");
     }
     return var;
 }

@@ -23,8 +23,8 @@ public :
 
     CSP() {nb_var = 0; arbre = Arbre_dom(domaines, contraintes, contraintes_par_var,contraintes_communes);} // constructeur par défaut
 
-    vector<int> solve(bt_heuristic_var var_heuristic = bt_heuristic_var::varrandom,
-                      bt_heuristic_val val_heuristic = bt_heuristic_val::valrandom,
+    vector<int> solve(bt_heuristic_var var_heuristic = bt_heuristic_var::random,
+                      bt_heuristic_val val_heuristic = bt_heuristic_val::random,
                       bool enable_AC = true, look_ahead lookahead = look_ahead::forward_checking);
 
     void display_solution() const;
