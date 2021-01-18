@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <iterator>
 #include <random>
+#include <utility>
 #include "arbre_dom.h"
 
 using namespace std;
@@ -199,25 +200,47 @@ bool Arbre_dom::contraintes_satisfiables() const {
 }
 
 int Arbre_dom::bt_var_smallest_dom(std::vector<domaine_end> const& domaines_ends, int) {
-    int smallest = 0;
-    int smallest_s = domaines_ends[0] - domaines[0].begin();
+    int smallest = -1;
+    int smallest_s = -1;
     for (int i = 0; i<domaines.size(); i++) {
-        if (not(est_instanciee[i]) && (domaines_ends[i] - domaines[i].begin()) < smallest_s) {
-            smallest = i;
-            smallest_s = domaines_ends[i] - domaines[i].begin();
+        if (not(est_instanciee[i])) {
+            if (smallest == -1) {
+                smallest = i;
+                smallest_s = domaines_ends[i] - domaines[i].begin();
+            }
+            else {
+                if ((domaines_ends[i] - domaines[i].begin()) < smallest_s) {
+                smallest = i;
+                smallest_s = domaines_ends[i] - domaines[i].begin();
+                }
+            }
         }
+    }
+    if (smallest == -1) {
+        throw runtime_error("Trying to select a variable to initialize, but all variables are initialized !");
     }
     return smallest;
 }
 
 int Arbre_dom::bt_var_largest_dom(std::vector<domaine_end> const& domaines_ends, int) {
-    int largest = 0;
-    int largest_s = domaines_ends[0] - domaines[0].begin();
+    int largest = -1;
+    int largest_s = -1;
     for (int i = 0; i<domaines.size(); i++) {
-        if (not(est_instanciee[i]) && (domaines_ends[i] - domaines[i].begin()) > largest_s) {
-            largest = i;
-            largest_s = domaines_ends[i] - domaines[i].begin();
+        if (not(est_instanciee[i])) {
+            if (largest == -1) {
+                largest = i;
+                largest_s = domaines_ends[i] - domaines[i].begin();
+            }
+            else {
+                if ((domaines_ends[i] - domaines[i].begin()) > largest_s) {
+                largest = i;
+                largest_s = domaines_ends[i] - domaines[i].begin();
+                }
+            }
         }
+    }
+    if (largest == -1) {
+        throw runtime_error("Trying to select a variable to initialize, but all variables are initialized !");
     }
     return largest;
 }
@@ -257,31 +280,55 @@ int Arbre_dom::bt_var_random(std::vector<domaine_end> const&, int) {
     if (index != -1) {
         return index;
     }
-    throw runtime_error("Trying to backtrack while all var are instanciated");
+    throw runtime_error("Trying to select a variable to initialize, but all variables are initialized !");
 }
 
 int Arbre_dom::bt_var_constrained(std::vector<domaine_end> const&, int) {
     // Choose var with highest number of constraints
-    int nb_constraints = 0;
-    int var = 0;
+    int nb_constraints = -1;
+    int var = -1;
     for (auto v = 0; v<nb_var; v++) {
-        if (contraintes_par_var[v].size() > nb_constraints) {
-            nb_constraints = contraintes_par_var[v].size();
-            var = v;
+        if (not(est_instanciee[v])) {
+            if (var == -1) {
+                var = v;
+                nb_constraints = contraintes_par_var[v].size();
+            }
+            else {
+                if (contraintes_par_var[v].size() > nb_constraints) {
+                    nb_constraints = contraintes_par_var[v].size();
+                    var = v;
+                }
+            }
         }
+
+    }
+    if (var == -1) {
+        throw runtime_error("Trying to select a variable to initialize, but all variables are initialized !");
     }
     return var;
 }
 
 int Arbre_dom::bt_var_relaxed(std::vector<domaine_end> const&, int) {
     // Choose the var with the smallest number of constraints
-    int nb_contraints = contraintes_par_var[0].size();
-    int var = 0;
-    for (auto v = 1; v<nb_var; v++) {
-        if (contraintes_par_var[v].size() < nb_contraints) {
-            nb_contraints = contraintes_par_var[v].size();
-            var = v;
+    int nb_constraints = -1;
+    int var = -1;
+    for (auto v = 0; v<nb_var; v++) {
+        if (not(est_instanciee[v])) {
+            if (var == -1) {
+                var = v;
+                nb_constraints = contraintes_par_var[v].size();
+            }
+            else {
+                if (contraintes_par_var[v].size() < nb_constraints) {
+                    nb_constraints = contraintes_par_var[v].size();
+                    var = v;
+                }
+            }
         }
+
+    }
+    if (var == -1) {
+        throw runtime_error("Trying to select a variable to initialize, but all variables are initialized !");
     }
     return var;
 }
@@ -308,7 +355,7 @@ int Arbre_dom::bt_var_linked(std::vector<domaine_end> const&, int var_instanciee
     return find(est_instanciee.begin(), est_instanciee.end(), false) - est_instanciee.begin();
 }
 
-void Arbre_dom::bt_val_smallest(domaine & val_dom, domaine_end val_dom_end) {
+void Arbre_dom::bt_val_smallest(domaine & val_dom, domaine_end val_dom_end, int) {
     if (not is_sorted(val_dom.begin(), val_dom_end)) {
         sort(val_dom.begin(), val_dom_end);
     }
@@ -318,20 +365,100 @@ bool reverse_comp(int const a, int const b) {
     return a > b;
 }
 
-void Arbre_dom::bt_val_largest(domaine & val_dom, domaine_end val_dom_end) {
+void Arbre_dom::bt_val_largest(domaine & val_dom, domaine_end val_dom_end, int) {
     if (not is_sorted(val_dom.begin(), val_dom_end, reverse_comp)) {
         sort(val_dom.begin(), val_dom_end, reverse_comp);
     }
 }
 
-void Arbre_dom::bt_val_random(domaine & val_dom, domaine_end val_dom_end) {
+void Arbre_dom::bt_val_random(domaine & val_dom, domaine_end val_dom_end, int) {
     random_shuffle(val_dom.begin(), val_dom_end);
 }
 
-bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end),
+int count_nb_appearance_first(int val, set<pair<int,int>> const & constraint_pairs) {
+    int count = 0;
+    for (auto &p : constraint_pairs) {
+        if (p.first == val) {
+            count++;
+        }
+    }
+    return count;
+}
+
+int count_nb_appearance_second(int val, set<pair<int,int>> const & constraint_pairs) {
+    int count = 0;
+    for (auto &p : constraint_pairs) {
+        if (p.second == val) {
+            count++;
+        }
+    }
+    return count;
+}
+
+int count_nb_appearance(int val, set<pair<int,int> > const & constraint_pairs, bool first) {
+    if (first) {
+        return count_nb_appearance_first(val, constraint_pairs);
+    }
+    return count_nb_appearance_second(val, constraint_pairs);
+}
+
+int count_total_nb_appearance(int val, vector<int> & constraints_indexes, int var_instanciee, vector<Contrainte> const & contraintes) {
+    int nb_appearance = 0;
+    for (auto &c : constraints_indexes) {
+        bool first = var_instanciee == contraintes[c].var1;
+        nb_appearance += count_nb_appearance(val, contraintes[c].c, first);
+    }
+    return nb_appearance;
+}
+
+int count_nb_unique_appearance(int val, vector<int> & constraints_indexes, int var_instanciee, vector<Contrainte> const & contraintes) {
+    int nb_unique_appearance = 0;
+    for (auto &c : constraints_indexes) {
+        bool first = var_instanciee == contraintes[c].var1;
+        int nb_appearance = count_nb_appearance(val, contraintes[c].c, first);
+        if (nb_appearance == 1) {
+            nb_unique_appearance++;
+        }
+    }
+    return nb_unique_appearance;
+}
+
+void Arbre_dom::bt_val_most_supported(domaine & val_dom, domaine_end dom_end, int var_instanciee) {
+    auto appears_more = [var_instanciee](int const val1, int const val2) {
+        return count_total_nb_appearance(val1, contraintes_par_var[var_instanciee], var_instanciee, contraintes)
+                > count_total_nb_appearance(val2, contraintes_par_var[var_instanciee], var_instanciee, contraintes);
+    };
+    sort(val_dom.begin(), dom_end, appears_more);
+}
+
+void Arbre_dom::bt_val_least_supported(domaine & val_dom, domaine_end dom_end, int var_instanciee) {
+    auto appears_more = [var_instanciee](int const val1, int const val2) {
+        return count_total_nb_appearance(val1, contraintes_par_var[var_instanciee], var_instanciee, contraintes)
+                < count_total_nb_appearance(val2, contraintes_par_var[var_instanciee], var_instanciee, contraintes);
+    };
+    sort(val_dom.begin(), dom_end, appears_more);
+}
+
+void Arbre_dom::bt_val_most_filtration(domaine & val_dom, domaine_end dom_end, int var_instanciee) {
+    auto appears_more = [var_instanciee](int const val1, int const val2) {
+        return count_nb_unique_appearance(val1, contraintes_par_var[var_instanciee], var_instanciee, contraintes) / contraintes_par_var[var_instanciee].size()
+                > count_nb_unique_appearance(val2, contraintes_par_var[var_instanciee], var_instanciee, contraintes) / contraintes_par_var[var_instanciee].size();
+    };
+    sort(val_dom.begin(), dom_end, appears_more);
+}
+
+void Arbre_dom::bt_val_fewest_filtration(domaine & val_dom, domaine_end dom_end, int var_instanciee) {
+    auto appears_more = [var_instanciee](int const val1, int const val2) {
+        return count_nb_unique_appearance(val1, contraintes_par_var[var_instanciee], var_instanciee, contraintes) / contraintes_par_var[var_instanciee].size()
+                < count_nb_unique_appearance(val2, contraintes_par_var[var_instanciee], var_instanciee, contraintes) / contraintes_par_var[var_instanciee].size();
+    };
+    sort(val_dom.begin(), dom_end, appears_more);
+}
+
+bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end, int),
                                look_ahead lookahead, int var_instanciee) {
     int i = heuristique_var(domaines_ends, var_instanciee);
-    heuristique_val(domaines[i], domaines_ends[i]);
+    heuristique_val(domaines[i], domaines_ends[i], i);
     est_instanciee[i] = true;
     nb_instanciee++;
     for (auto j = 0; j<(domaines_ends[i] - domaines[i].begin()); j++) {
@@ -355,7 +482,7 @@ bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> cons
     return false;
 }
 
-bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end),
+bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end, int),
                           look_ahead lookahead) {
     if (!contraintes_satisfiables()) {
         return false;
@@ -367,7 +494,7 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&, i
     return backtrack_loop(heuristique_var, heuristique_val, lookahead);
 }
 
-bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end),
+bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end, int),
                           int var_instanciee, look_ahead lookahead) {
 //    clog << "Starting BT with i = " << var_instanciee << endl;
     if (not(var_satisfait_contraintes(var_instanciee))) {
@@ -394,37 +521,49 @@ bool Arbre_dom::backtrack(int heuristique_var(std::vector<domaine_end> const&, i
 
 bool Arbre_dom::backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, look_ahead lookahead) {
     int (*pheuristique_var)(std::vector<domaine_end> const&, int);
-    if (var_heuristic == bt_heuristic_var::varlargest) {
+    if (var_heuristic == bt_heuristic_var::largest_domain) {
         pheuristique_var = Arbre_dom::bt_var_largest_dom;
     }
-    else if (var_heuristic == bt_heuristic_var::varsmallest) {
+    else if (var_heuristic == bt_heuristic_var::smallest_domain) {
         pheuristique_var = Arbre_dom::bt_var_smallest_dom;
     }
-    else if (var_heuristic == bt_heuristic_var::varrandom) {
+    else if (var_heuristic == bt_heuristic_var::random) {
         pheuristique_var = Arbre_dom::bt_var_random;
     }
-    else if (var_heuristic == bt_heuristic_var::varconstrained) {
+    else if (var_heuristic == bt_heuristic_var::most_constraints) {
         pheuristique_var = Arbre_dom::bt_var_constrained;
     }
-    else if (var_heuristic == bt_heuristic_var::varrelaxed) {
+    else if (var_heuristic == bt_heuristic_var::least_constraints) {
         pheuristique_var = Arbre_dom::bt_var_relaxed;
     }
-    else if (var_heuristic == bt_heuristic_var::varlinked) {
+    else if (var_heuristic == bt_heuristic_var::linked_to_previous_var) {
         pheuristique_var = Arbre_dom::bt_var_linked;
     }
     else {
         throw runtime_error("Calling backtrack with non existent heuristic !");
     }
 
-    void (*pheuristique_val)(domaine &, domaine_end);
-    if (val_heuristic == bt_heuristic_val::vallargest) {
+    void (*pheuristique_val)(domaine &, domaine_end, int);
+    if (val_heuristic == bt_heuristic_val::largest) {
         pheuristique_val = Arbre_dom::bt_val_largest;
     }
-    else if (val_heuristic == bt_heuristic_val::valsmallest) {
+    else if (val_heuristic == bt_heuristic_val::smallest) {
         pheuristique_val = Arbre_dom::bt_val_smallest;
     }
-    else if (val_heuristic == bt_heuristic_val::valrandom) {
+    else if (val_heuristic == bt_heuristic_val::random) {
         pheuristique_val = Arbre_dom::bt_val_random;
+    }
+    else if (val_heuristic == bt_heuristic_val::most_supported) {
+        pheuristique_val = Arbre_dom::bt_val_most_supported;
+    }
+    else if (val_heuristic == bt_heuristic_val::least_supported) {
+        pheuristique_val = Arbre_dom::bt_val_least_supported;
+    }
+    else if (val_heuristic == bt_heuristic_val::most_filtration) {
+        pheuristique_val = Arbre_dom::bt_val_most_filtration;
+    }
+    else if (val_heuristic == bt_heuristic_val::fewest_filtration) {
+        pheuristique_val = Arbre_dom::bt_val_fewest_filtration;
     }
     else {
         throw runtime_error("Calling backtrack with non existent heuristic !");

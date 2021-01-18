@@ -291,13 +291,14 @@ CSP creation_csp(){
 // Fin des fontions de l'interface
 
 int main(){
-    CSP csp= creation_csp();
+//    CSP csp= creation_csp();
 
 //    cout << "Min number of colorations : " << solve_mincol("../thib.col", 10) + 1 << endl;
 //    cout << "Min number of colorations : " << solve_mincol("../fpsol2.i.2.col", 40) << endl;
-    Reine r = Reine(4);
-    r.solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, true, look_ahead::forward_checking);
+    Reine r = Reine(8);
+    r.solve(bt_heuristic_var::smallest_domain, bt_heuristic_val::smallest, true, look_ahead::maintain_arc_consistency);
     r.display_tree_size();
+    r.display_solution();
 
     return 0;
 }
