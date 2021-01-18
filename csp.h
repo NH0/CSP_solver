@@ -38,6 +38,8 @@ class Reine : public CSP{
     Reine();
 public :
     Reine(int n);
+
+    void display_solution() const;
 };
 
 vector<int> intersection(vector<int> &v1,vector<int> &v2);

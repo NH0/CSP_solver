@@ -72,3 +72,25 @@ Reine::Reine(int n){
     }
     arbre = Arbre_dom(domaines, contraintes, contraintes_par_var,contraintes_communes);
 }
+
+void Reine::display_solution() const {
+    vector<int> solution = arbre.get_solution();
+    if (solution.empty()) {
+        throw runtime_error("Cannot display empty solution !");
+    }
+    cout << " " << string(nb_var * 4 - 1, '-') << "\n";
+    for (auto i = 0; i < nb_var; i++) {
+        cout << "|";
+        for (auto j = 0; j < nb_var; j++) {
+            if (solution[j] == i) {
+                cout << " X |";
+            }
+            else {
+                cout << "   |";
+            }
+        }
+        cout << "\n"
+             << " " << string(nb_var * 4 - 1, '-') << "\n";
+    }
+    cout << endl;
+}
