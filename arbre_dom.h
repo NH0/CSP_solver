@@ -6,18 +6,22 @@
 #include "contrainte.h"
 
 enum struct bt_heuristic_var {
-    varlargest,
-    varsmallest,
-    varrandom,
-    varconstrained,
-    varrelaxed,
-    varlinked
+    largest_domain,
+    smallest_domain,
+    random,
+    most_constraints,
+    least_constraints,
+    linked_to_previous_var
 };
 
 enum struct bt_heuristic_val {
-    vallargest,
-    valsmallest,
-    valrandom
+    largest,
+    smallest,
+    random,
+    most_supported,
+    least_supported,
+    most_filtration,
+    fewest_filtration
 };
 
 enum struct look_ahead {
@@ -60,16 +64,22 @@ private:
     static int bt_var_relaxed(std::vector<domaine_end> const&, int);
     static int bt_var_linked(std::vector<domaine_end> const&, int var_instanciee);
 
-    static void bt_val_smallest(domaine & val_dom, domaine_end dom_end);
-    static void bt_val_largest(domaine & val_dom, domaine_end dom_end);
-    static void bt_val_random(domaine & val_dom, domaine_end dom_end);
+    static void bt_val_smallest(domaine & val_dom, domaine_end dom_end, int);
+    static void bt_val_largest(domaine & val_dom, domaine_end dom_end, int);
+    static void bt_val_random(domaine & val_dom, domaine_end dom_end, int);
+    static void bt_val_most_supported(domaine & val_dom, domaine_end dom_end, int i);
+    static void bt_val_least_supported(domaine & val_dom, domaine_end dom_end, int i);
+    static void bt_val_most_filtration(domaine & val_dom, domaine_end dom_end, int i);
+    static void bt_val_fewest_filtration(domaine & val_dom, domaine_end dom_end, int i);
 
-    bool backtrack_loop(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end),
+    bool backtrack_loop(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end, int),
                         look_ahead lookahead, int var_instanciee = -1);
-    bool backtrack(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end),
+    bool backtrack(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end, int),
                    look_ahead lookahead);
-    bool backtrack(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end),
+    bool backtrack(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end, int),
                    int var_instanciee, look_ahead lookahead);
+
+    bool forward_checking(int const var_instanciee);
 
 public:
     Arbre_dom() : parent(nullptr) {nb_instanciee = 0;};
@@ -95,7 +105,6 @@ public:
     bool backtrack(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, look_ahead lookahead);
 
     bool arc_consistence(int var);
-    bool forward_checking(int const var_instanciee);
 
 };
 

@@ -442,6 +442,7 @@ void knapsack_problems(int n, vector<int> &v, vector<vector<int>> &w, vector<int
 }
 
 int main(){
+
     vector<vector<int>> weights;
     vector<int> values;
     vector<int> Wmax;
@@ -452,15 +453,15 @@ int main(){
 
     Knapsack* k = new Knapsack(values,weights,Wmax,B);
 
-    vector<int> sol = k->solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, false, look_ahead::forward_checking);
+//    vector<int> sol = k->solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, false, look_ahead::forward_checking);
 
-    k->display_tree_size();
+//    k->display_tree_size();
 
-    k = new Knapsack(k,k->get_value_solution(sol)+k->dt);
+//    k = new Knapsack(k,k->get_value_solution(sol)+k->dt);
 
-    sol = k->solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, false, look_ahead::forward_checking);
+//    sol = k->solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, false, look_ahead::forward_checking);
 
-    k->display_tree_size();
+//    k->display_tree_size();
 
 //    vector<int> sol = solve_knapsack(values,weights,Wmax);
 
@@ -477,9 +478,12 @@ int main(){
 
 //    cout << "Min number of colorations : " << solve_mincol("../thib.col", 10) + 1 << endl;
 //    cout << "Min number of colorations : " << solve_mincol("../fpsol2.i.2.col", 40) << endl;
-//    Reine r = Reine(4);
-//    r.solve(bt_heuristic_var::varrandom, bt_heuristic_val::valrandom, true, look_ahead::forward_checking);
+//
+    Reine r = Reine(8);
+//    r.solve(bt_heuristic_var::smallest_domain, bt_heuristic_val::smallest, true, look_ahead::maintain_arc_consistency);
 //    r.display_tree_size();
+//    r.display_solution();
+
 
     return 0;
 }
