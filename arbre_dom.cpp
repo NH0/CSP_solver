@@ -602,10 +602,11 @@ bool Arbre_dom::arc_consistence(int var){
         aTester.pop();
         vector<vector<int>::iterator> aSupprimer; // c'est la liste des variables à supprimer du domaine
         // avec cette première boucle, nous testons si il existe un support pour chaque valeur de la variable x
-        for (int i=1; i < domaines[test[0]].size();i++){
-            int vx = domaines[test[0]][i];
+        for (auto iter = domaines[test[0]].begin(); iter != domaines_ends[test[0]]; iter++){
+            int vx = *iter;
             bool support = true; // c'est le booléen qui nous aidera à determiner si une valeur de x à un support
-            for (auto const &vy : domaines[test[1]]){
+            for (auto iter2 = domaines[test[1]].begin(); iter2 != domaines_ends[test[1]]; iter2++){
+                int vy = *iter2;
                 int c = contraintes_communes[pair<int,int>(min(test[0],test[1]),max(test[0],test[1]))];
 
                 if (contraintes[c].var1==test[0]){
@@ -619,7 +620,7 @@ bool Arbre_dom::arc_consistence(int var){
                 }
             }
             if (not support){ // si l'on a pas de support : on doit supprimer vx
-                aSupprimer.push_back(i);
+                aSupprimer.push_back(iter);
             }
         }
         // si ce n'est pas le cas, on ajoute des nouvelles contraintes à tester
@@ -635,8 +636,8 @@ bool Arbre_dom::arc_consistence(int var){
                     }
                 }
             }
-            for (int index = aSupprimer.size()-1; index >=0 ; index--){
-                iter_swap(domaines_ends[test[0]]-1,domaines[test[0]].begin()+aSupprimer[index]);
+            for (auto & iter : aSupprimer){
+                iter_swap(domaines_ends[test[0]] - 1, iter);
                 domaines_ends[test[0]] --;
             }
         }
