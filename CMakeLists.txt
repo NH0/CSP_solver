@@ -10,4 +10,6 @@ add_executable(CSP_solver main.cpp
                             csp.h csp.cpp
                             coloration.h coloration.cpp
                             arbre_dom.h arbre_dom.cpp
-                            contrainte.h contrainte.cpp)
+                            contrainte.h contrainte.cpp
+                            build_in_problems.h build_in_problems.cpp
+                            interface.h interface.cpp)
