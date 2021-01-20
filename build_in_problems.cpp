@@ -48,7 +48,7 @@ Knapsack::Knapsack(std::vector<int> values,std::vector<vector<int>> weights, vec
         contraintes_communes.insert(pair<pair<int,int>,int>({i,nb_var-1},contraintes.size() - 1));
     }
 
-    arbre = Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
+    arbre = new Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
 }
 
 Knapsack::Knapsack(Knapsack* knapsack,int B){
@@ -61,7 +61,7 @@ Knapsack::Knapsack(Knapsack* knapsack,int B){
     contraintes = knapsack->contraintes;
     contraintes_par_var = knapsack->contraintes_par_var;
     contraintes_communes = knapsack->contraintes_communes;
-    arbre = Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
+    arbre = new Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
 
     // change the domain of the value of the criteria
     std::vector<int> new_dom = {};

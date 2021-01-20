@@ -36,10 +36,10 @@ class Arbre_dom {
 private:
 
     static int nb_var;
-    static std::vector<Contrainte>& contraintes;
-    static std::vector<std::vector<int>>& contraintes_par_var;
-    static std::map<std::pair<int,int>,int>& contraintes_communes;
-    static std::vector<domaine> domaines;
+    static std::vector<Contrainte>* contraintes;
+    static std::vector<std::vector<int>>* contraintes_par_var;
+    static std::map<std::pair<int,int>,int>* contraintes_communes;
+    static std::vector<domaine>* domaines;
     static std::vector<int> val_instanciation;
     static std::vector<bool> est_instanciee;
     static int nb_instanciee;
