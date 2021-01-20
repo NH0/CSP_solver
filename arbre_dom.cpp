@@ -342,16 +342,19 @@ int Arbre_dom::bt_var_linked(std::vector<domaine_end> const&, int var_instanciee
         return 0;
     }
     int c = 0;
-    Contrainte* con = &contraintes[contraintes_par_var[var_instanciee][c]];
-    int other_var = con->var1 == var_instanciee ? con->var2 : con->var1;
+    int other_var = -1;
+    bool est_instanciee_other = true;
 
-    while (c < contraintes_par_var[var_instanciee].size() && est_instanciee[other_var]) {
+    while (c < (*contraintes_par_var)[var_instanciee].size() && est_instanciee_other) {
+        Contrainte* con = &(*contraintes)[(*contraintes_par_var)[var_instanciee][c]];
+        int other_var = con->var1 == var_instanciee ? con->var2 : con->var1;
+        est_instanciee_other = est_instanciee[other_var];
         c++;
-        con = &contraintes[contraintes_par_var[var_instanciee][c]];
-        other_var = con->var1 == var_instanciee ? con->var2 : con->var1;
     }
-    if (c < contraintes_par_var[var_instanciee].size()) {
-        return other_var;
+    if (c < (*contraintes_par_var)[var_instanciee].size()) {
+        if (other_var != -1) {
+            return other_var;
+        }
     }
     // First non instanciated variable
     return find(est_instanciee.begin(), est_instanciee.end(), false) - est_instanciee.begin();
