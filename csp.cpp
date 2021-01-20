@@ -5,21 +5,21 @@
 std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val_heuristic, bool enable_AC, look_ahead lookahead) {
     auto start = chrono::high_resolution_clock::now();
     if (enable_AC) {
-        if(not arbre.arc_consistence(-1)) {
+        if(not arbre->arc_consistence(-1)) {
             return {};
         }
     }
-    if(arbre.backtrack(var_heuristic, val_heuristic, lookahead)) {
+    if(arbre->backtrack(var_heuristic, val_heuristic, lookahead)) {
         auto stop = chrono::high_resolution_clock::now();
-        cout << "Solve time : " << chrono::duration_cast<chrono::milliseconds>(stop - start).count() << "ms" << endl;
-        return arbre.get_solution();
+        cout << "Solve time : " << chrono::duration_cast<chrono::milliseconds>(stop - start).count() << " ms" << endl;
+        return arbre->get_solution();
     }
     cout << "No solution" << endl;
     return {};
 }
 
 void CSP::display_solution() const {
-    vector<int> solution = arbre.get_solution();
+    vector<int> solution = arbre->get_solution();
     if (solution.empty()) {
         cerr << "Solution empty !" << endl;
     }
@@ -30,7 +30,7 @@ void CSP::display_solution() const {
 }
 
 void CSP::display_tree_size() const {
-    arbre.display_tree_size();
+    arbre->display_tree_size();
 }
 
 Reine::Reine(int n){
@@ -70,11 +70,21 @@ Reine::Reine(int n){
             contraintes_communes.insert(pair<pair<int,int>,int>({i,j},contraintes.size() - 1));
         }
     }
-    arbre = Arbre_dom(domaines, contraintes, contraintes_par_var,contraintes_communes);
+    for (auto &dom : domaines) {
+        dom.shrink_to_fit();
+    }
+    domaines.shrink_to_fit();
+    contraintes.shrink_to_fit();
+    cout << contraintes.capacity() << endl;
+    for (auto &contr :contraintes_par_var) {
+        contr.shrink_to_fit();
+    }
+    contraintes_par_var.shrink_to_fit();
+    arbre = new Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
 }
 
 void Reine::display_solution() const {
-    vector<int> solution = arbre.get_solution();
+    vector<int> solution = arbre->get_solution();
     if (solution.empty()) {
         throw runtime_error("Cannot display empty solution !");
     }

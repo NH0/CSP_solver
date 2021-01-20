@@ -52,7 +52,7 @@ Coloration::Coloration(string const filename, int const k0) {
                 }
             }
             file.close();
-            arbre = Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
+            arbre = new Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
         }
         else {
             cerr << "Could not open file" << endl;
@@ -78,11 +78,11 @@ Coloration::Coloration(Coloration* col, int const k0) {
     contraintes = col->contraintes;
     contraintes_par_var = col->contraintes_par_var;
     contraintes_communes = col->contraintes_communes;
-    arbre = Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
+    arbre = new Arbre_dom(domaines, contraintes, contraintes_par_var, contraintes_communes);
 }
 
 int Coloration::get_maxcol_val() const {
-    const vector<int>& solution = arbre.get_solution();
+    const vector<int>& solution = arbre->get_solution();
     return *max_element(solution.begin(), solution.end());
 }
 

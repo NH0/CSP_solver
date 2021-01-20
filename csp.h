@@ -21,7 +21,8 @@ public :
     vector<vector<int>> contraintes_par_var; // indice des contraintes par variable
     map<pair<int,int>,int> contraintes_communes; // dictionnaire qui liste les contraintes communes à i et j (i<j)
 
-    CSP() {nb_var = 0; arbre = Arbre_dom(domaines, contraintes, contraintes_par_var,contraintes_communes);} // constructeur par défaut
+    CSP() {} // constructeur par défaut
+    ~CSP() {delete arbre;}
 
     vector<int> solve(bt_heuristic_var var_heuristic = bt_heuristic_var::random,
                       bt_heuristic_val val_heuristic = bt_heuristic_val::random,
@@ -31,11 +32,11 @@ public :
     void display_tree_size() const;
 
 protected :
-    Arbre_dom arbre;
+    Arbre_dom* arbre = nullptr;
 };
 
 class Reine : public CSP{
-    Reine();
+//    Reine();
 public :
     Reine(int n);
 

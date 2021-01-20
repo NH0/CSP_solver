@@ -14,14 +14,11 @@ typedef std::vector<int>::iterator::iterator_type domaine_end;
 
 int Arbre_dom::nb_var=0;
 
-vector<Contrainte> temp_vec = {};
-vector<Contrainte>& Arbre_dom::contraintes = temp_vec;
-vector<vector<int>> temp_vec2 = {};
-vector<vector<int>>& Arbre_dom::contraintes_par_var = temp_vec2;
-map<pair<int,int>,int> temp_map = {};
-map<pair<int,int>,int>& Arbre_dom::contraintes_communes = temp_map;
+vector<Contrainte>* Arbre_dom::contraintes = nullptr;
+vector<vector<int>>* Arbre_dom::contraintes_par_var = nullptr;
+map<pair<int,int>,int>* Arbre_dom::contraintes_communes = nullptr;
+std::vector<domaine>* Arbre_dom::domaines = nullptr;
 
-std::vector<domaine> Arbre_dom::domaines = {};
 std::vector<int> Arbre_dom::val_instanciation = {};
 std::vector<bool> Arbre_dom::est_instanciee = {};
 
@@ -34,16 +31,19 @@ Arbre_dom::Arbre_dom(std::vector<domaine>& init_domaines, vector<Contrainte>& in
     parent = nullptr;
     fils = {};
     nb_instanciee = 0;
-    domaines = init_domaines;
-    for (auto &domi : domaines) {
+    domaines = &init_domaines;
+    for (auto &domi : (*domaines)) {
         domaines_ends.push_back(domi.end());
     }
-    nb_var = domaines.size();
+    domaines_ends.shrink_to_fit();
+    nb_var = (*domaines).size();
     val_instanciation = vector<int>(nb_var, 0);
+    val_instanciation.shrink_to_fit();
     est_instanciee = vector<bool>(nb_var, false);
-    contraintes = init_contraintes;
-    contraintes_par_var = init_contrainte_var;
-    contraintes_communes = init_contrainte_comm;
+    est_instanciee.shrink_to_fit();
+    contraintes = &init_contraintes;
+    contraintes_par_var = &init_contrainte_var;
+    contraintes_communes = &init_contrainte_comm;
 
     solution = {};
 }
@@ -63,7 +63,7 @@ Arbre_dom::~Arbre_dom() {
 }
 
 vector<domaine> const& Arbre_dom::get_domaines() const {
-    return domaines;
+    return *domaines;
 }
 
 vector<int> const& Arbre_dom::get_instanciation() const {
@@ -127,7 +127,7 @@ int Arbre_dom::get_nb_fils() const {
 }
 
 bool Arbre_dom::var_satisfait_contraintes(int const var) const {
-    for (auto c : contraintes_par_var[var]) {
+    for (auto c : (*contraintes_par_var)[var]) {
         if (not(contrainte_satisfiable(c))) {
             return false;
         }
@@ -144,7 +144,7 @@ bool Arbre_dom::contrainte_satisfiable(Contrainte const* const contrainte, int c
         return contrainte->satisfaite(val1, val_instanciation[contrainte->var2]);
     }
     else {
-        for (auto const &j : domaines[contrainte->var2]) {
+        for (auto const &j : (*domaines)[contrainte->var2]) {
             if (contrainte->satisfaite(val1, j)) {
                 return true;
             }
@@ -160,15 +160,15 @@ bool Arbre_dom::contrainte_satisfiable(Contrainte const* const contrainte) const
     }
     else {
         if (est_instanciee[contrainte->var2]) {
-            for (auto const &i : domaines[contrainte->var1]) {
+            for (auto const &i : (*domaines)[contrainte->var1]) {
                 if (contrainte->satisfaite(i, val_instanciation[contrainte->var2])) {
                     return true;
                 }
             }
         }
         else {
-            for (auto const &i : domaines[contrainte->var1]) {
-                for (auto const &j : domaines[contrainte->var2]) {
+            for (auto const &i : (*domaines)[contrainte->var1]) {
+                for (auto const &j : (*domaines)[contrainte->var2]) {
                     if (contrainte->satisfaite(i, j)) {
                         return true;
                     }
@@ -184,7 +184,7 @@ bool Arbre_dom::contrainte_satisfiable(int const c) const {
     /**
      * @brief Contrainte d'indice i est-elle satisfiable par instanciatin ?
      */
-    Contrainte const contrainte = contraintes[c];
+    Contrainte const contrainte = (*contraintes)[c];
     // Si la variable est instanciée
     return contrainte_satisfiable(&contrainte);
 }
@@ -193,7 +193,7 @@ bool Arbre_dom::contraintes_satisfiables() const {
     /***
      * Toutes les contraintes sont-elles satisfaites par instanciation ?
      */
-    for (auto i = 0; i<contraintes.size(); i++) {
+    for (auto i = 0; i<(*contraintes).size(); i++) {
         if (!contrainte_satisfiable(i)) {
             return false;
         }
@@ -204,16 +204,16 @@ bool Arbre_dom::contraintes_satisfiables() const {
 int Arbre_dom::bt_var_smallest_dom(std::vector<domaine_end> const& domaines_ends, int) {
     int smallest = -1;
     int smallest_s = -1;
-    for (int i = 0; i<domaines.size(); i++) {
+    for (int i = 0; i<(*domaines).size(); i++) {
         if (not(est_instanciee[i])) {
             if (smallest == -1) {
                 smallest = i;
-                smallest_s = domaines_ends[i] - domaines[i].begin();
+                smallest_s = domaines_ends[i] - (*domaines)[i].begin();
             }
             else {
-                if ((domaines_ends[i] - domaines[i].begin()) < smallest_s) {
+                if ((domaines_ends[i] - (*domaines)[i].begin()) < smallest_s) {
                 smallest = i;
-                smallest_s = domaines_ends[i] - domaines[i].begin();
+                smallest_s = domaines_ends[i] - (*domaines)[i].begin();
                 }
             }
         }
@@ -227,16 +227,16 @@ int Arbre_dom::bt_var_smallest_dom(std::vector<domaine_end> const& domaines_ends
 int Arbre_dom::bt_var_largest_dom(std::vector<domaine_end> const& domaines_ends, int) {
     int largest = -1;
     int largest_s = -1;
-    for (int i = 0; i<domaines.size(); i++) {
+    for (int i = 0; i<(*domaines).size(); i++) {
         if (not(est_instanciee[i])) {
             if (largest == -1) {
                 largest = i;
-                largest_s = domaines_ends[i] - domaines[i].begin();
+                largest_s = domaines_ends[i] - (*domaines)[i].begin();
             }
             else {
-                if ((domaines_ends[i] - domaines[i].begin()) > largest_s) {
+                if ((domaines_ends[i] - (*domaines)[i].begin()) > largest_s) {
                 largest = i;
-                largest_s = domaines_ends[i] - domaines[i].begin();
+                largest_s = domaines_ends[i] - (*domaines)[i].begin();
                 }
             }
         }
@@ -293,11 +293,11 @@ int Arbre_dom::bt_var_constrained(std::vector<domaine_end> const&, int) {
         if (not(est_instanciee[v])) {
             if (var == -1) {
                 var = v;
-                nb_constraints = contraintes_par_var[v].size();
+                nb_constraints = (*contraintes_par_var)[v].size();
             }
             else {
-                if (contraintes_par_var[v].size() > nb_constraints) {
-                    nb_constraints = contraintes_par_var[v].size();
+                if ((*contraintes_par_var)[v].size() > nb_constraints) {
+                    nb_constraints = (*contraintes_par_var)[v].size();
                     var = v;
                 }
             }
@@ -318,11 +318,11 @@ int Arbre_dom::bt_var_relaxed(std::vector<domaine_end> const&, int) {
         if (not(est_instanciee[v])) {
             if (var == -1) {
                 var = v;
-                nb_constraints = contraintes_par_var[v].size();
+                nb_constraints = (*contraintes_par_var)[v].size();
             }
             else {
-                if (contraintes_par_var[v].size() < nb_constraints) {
-                    nb_constraints = contraintes_par_var[v].size();
+                if ((*contraintes_par_var)[v].size() < nb_constraints) {
+                    nb_constraints = (*contraintes_par_var)[v].size();
                     var = v;
                 }
             }
@@ -342,16 +342,19 @@ int Arbre_dom::bt_var_linked(std::vector<domaine_end> const&, int var_instanciee
         return 0;
     }
     int c = 0;
-    Contrainte* con = &contraintes[contraintes_par_var[var_instanciee][c]];
-    int other_var = con->var1 == var_instanciee ? con->var2 : con->var1;
+    int other_var = -1;
+    bool est_instanciee_other = true;
 
-    while (c < contraintes_par_var[var_instanciee].size() && est_instanciee[other_var]) {
+    while (c < (*contraintes_par_var)[var_instanciee].size() && est_instanciee_other) {
+        Contrainte* con = &(*contraintes)[(*contraintes_par_var)[var_instanciee][c]];
+        int other_var = con->var1 == var_instanciee ? con->var2 : con->var1;
+        est_instanciee_other = est_instanciee[other_var];
         c++;
-        con = &contraintes[contraintes_par_var[var_instanciee][c]];
-        other_var = con->var1 == var_instanciee ? con->var2 : con->var1;
     }
-    if (c < contraintes_par_var[var_instanciee].size()) {
-        return other_var;
+    if (c < (*contraintes_par_var)[var_instanciee].size()) {
+        if (other_var != -1) {
+            return other_var;
+        }
     }
     // First non instanciated variable
     return find(est_instanciee.begin(), est_instanciee.end(), false) - est_instanciee.begin();
@@ -427,32 +430,32 @@ int count_nb_unique_appearance(int val, vector<int> & constraints_indexes, int v
 
 void Arbre_dom::bt_val_most_supported(domaine & val_dom, domaine_end dom_end, int var_instanciee) {
     auto appears_more = [var_instanciee](int const val1, int const val2) {
-        return count_total_nb_appearance(val1, contraintes_par_var[var_instanciee], var_instanciee, contraintes)
-                > count_total_nb_appearance(val2, contraintes_par_var[var_instanciee], var_instanciee, contraintes);
+        return count_total_nb_appearance(val1, (*contraintes_par_var)[var_instanciee], var_instanciee, (*contraintes))
+                > count_total_nb_appearance(val2, (*contraintes_par_var)[var_instanciee], var_instanciee, (*contraintes));
     };
     sort(val_dom.begin(), dom_end, appears_more);
 }
 
 void Arbre_dom::bt_val_least_supported(domaine & val_dom, domaine_end dom_end, int var_instanciee) {
     auto appears_more = [var_instanciee](int const val1, int const val2) {
-        return count_total_nb_appearance(val1, contraintes_par_var[var_instanciee], var_instanciee, contraintes)
-                < count_total_nb_appearance(val2, contraintes_par_var[var_instanciee], var_instanciee, contraintes);
+        return count_total_nb_appearance(val1, (*contraintes_par_var)[var_instanciee], var_instanciee, (*contraintes))
+                < count_total_nb_appearance(val2, (*contraintes_par_var)[var_instanciee], var_instanciee, (*contraintes));
     };
     sort(val_dom.begin(), dom_end, appears_more);
 }
 
 void Arbre_dom::bt_val_most_filtration(domaine & val_dom, domaine_end dom_end, int var_instanciee) {
     auto appears_more = [var_instanciee](int const val1, int const val2) {
-        return count_nb_unique_appearance(val1, contraintes_par_var[var_instanciee], var_instanciee, contraintes) / contraintes_par_var[var_instanciee].size()
-                > count_nb_unique_appearance(val2, contraintes_par_var[var_instanciee], var_instanciee, contraintes) / contraintes_par_var[var_instanciee].size();
+        return count_nb_unique_appearance(val1, (*contraintes_par_var)[var_instanciee], var_instanciee, (*contraintes))
+                > count_nb_unique_appearance(val2, (*contraintes_par_var)[var_instanciee], var_instanciee, (*contraintes));
     };
     sort(val_dom.begin(), dom_end, appears_more);
 }
 
 void Arbre_dom::bt_val_fewest_filtration(domaine & val_dom, domaine_end dom_end, int var_instanciee) {
     auto appears_more = [var_instanciee](int const val1, int const val2) {
-        return count_nb_unique_appearance(val1, contraintes_par_var[var_instanciee], var_instanciee, contraintes) / contraintes_par_var[var_instanciee].size()
-                < count_nb_unique_appearance(val2, contraintes_par_var[var_instanciee], var_instanciee, contraintes) / contraintes_par_var[var_instanciee].size();
+        return count_nb_unique_appearance(val1, (*contraintes_par_var)[var_instanciee], var_instanciee, (*contraintes))
+                < count_nb_unique_appearance(val2, (*contraintes_par_var)[var_instanciee], var_instanciee, (*contraintes));
     };
     sort(val_dom.begin(), dom_end, appears_more);
 }
@@ -460,16 +463,16 @@ void Arbre_dom::bt_val_fewest_filtration(domaine & val_dom, domaine_end dom_end,
 bool Arbre_dom::backtrack_loop(int heuristique_var(std::vector<domaine_end> const&, int), void heuristique_val(domaine &, domaine_end, int),
                                look_ahead lookahead, int var_instanciee) {
     int i = heuristique_var(domaines_ends, var_instanciee);
-    heuristique_val(domaines[i], domaines_ends[i], i);
+    heuristique_val((*domaines)[i], domaines_ends[i], i);
     est_instanciee[i] = true;
     nb_instanciee++;
-    for (auto j = 0; j<(domaines_ends[i] - domaines[i].begin()); j++) {
+    for (auto j = 0; j<(domaines_ends[i] - (*domaines)[i].begin()); j++) {
         vector<domaine_end> nouv_domaines_ends = domaines_ends;
         if (j > 0) {
-            iter_swap(domaines[i].begin(), domaines[i].begin() + j);
+            iter_swap((*domaines)[i].begin(), (*domaines)[i].begin() + j);
         }
-        nouv_domaines_ends[i] = domaines[i].begin() + 1;
-        val_instanciation[i] = domaines[i][0];
+        nouv_domaines_ends[i] = (*domaines)[i].begin() + 1;
+        val_instanciation[i] = (*domaines)[i][0];
 
         ajout_fils(nouv_domaines_ends);
         Arbre_dom* fil = get_dernier_fils();
@@ -579,7 +582,7 @@ bool Arbre_dom::arc_consistence(int var){
     if (var == -1){ // pour utiliser l'arc consistence dans l'arbre il faut avoir tester l'ac globalement avant
         for (int i=0; i<nb_var;i++){
             for (int j=i+1; j<nb_var;j++){
-                if (contraintes_communes.find(pair<int,int>(i,j)) !=contraintes_communes.end()){
+                if ((*contraintes_communes).find(pair<int,int>(i,j)) !=(*contraintes_communes).end()){
                     aTester.push({i,j});
                     aTester.push({j,i});
                 }
@@ -589,7 +592,7 @@ bool Arbre_dom::arc_consistence(int var){
     else {
         for (int i=0; i<nb_var;i++){
             int m1 = min(i,var), m2 = max(i,var);
-            if (contraintes_communes.find(pair<int,int>(m1,m2)) !=contraintes_communes.end()){
+            if ((*contraintes_communes).find(pair<int,int>(m1,m2)) !=(*contraintes_communes).end()){
                 aTester.push({i,var}); // seulement besoin de tester les variables en lien avec celle qu'on instancie
             }
         }
@@ -602,18 +605,18 @@ bool Arbre_dom::arc_consistence(int var){
         aTester.pop();
         vector<vector<int>::iterator> aSupprimer; // c'est la liste des variables à supprimer du domaine
         // avec cette première boucle, nous testons si il existe un support pour chaque valeur de la variable x
-        for (auto iter = domaines[test[0]].begin(); iter != domaines_ends[test[0]]; iter++){
+        for (auto iter = (*domaines)[test[0]].begin(); iter != domaines_ends[test[0]]; iter++){
             int vx = *iter;
             bool support = true; // c'est le booléen qui nous aidera à determiner si une valeur de x à un support
-            for (auto iter2 = domaines[test[1]].begin(); iter2 != domaines_ends[test[1]]; iter2++){
+            for (auto iter2 = (*domaines)[test[1]].begin(); iter2 != domaines_ends[test[1]]; iter2++){
                 int vy = *iter2;
-                int c = contraintes_communes[pair<int,int>(min(test[0],test[1]),max(test[0],test[1]))];
+                int c = (*contraintes_communes)[pair<int,int>(min(test[0],test[1]),max(test[0],test[1]))];
 
-                if (contraintes[c].var1==test[0]){
-                    support = contraintes[c].satisfaite(vx,vy);
+                if ((*contraintes)[c].var1==test[0]){
+                    support = (*contraintes)[c].satisfaite(vx,vy);
                 }
                 else{
-                    support = contraintes[c].satisfaite(vy,vx);
+                    support = (*contraintes)[c].satisfaite(vy,vx);
                 }
                 if (support){
                     break; // pas besoin de tester tous les vy si on a déjà un support
@@ -627,7 +630,7 @@ bool Arbre_dom::arc_consistence(int var){
         // car elles peuvent etre impactées par la suppression de valeur(s) du domaine de x
         if (not aSupprimer.empty()){
             for (int i=0;i<nb_var;i++){
-                if (contraintes_communes.find(pair<int,int>(i,test[0])) != contraintes_communes.end()){
+                if ((*contraintes_communes).find(pair<int,int>(i,test[0])) != (*contraintes_communes).end()){
                     if (min(i,test[0])==test[0] and max(i,test[0])!=test[1]){
                         aTester.push({max(i,test[0]),test[0]});
                     }
@@ -642,7 +645,7 @@ bool Arbre_dom::arc_consistence(int var){
             }
         }
 
-        empty_var = domaines[test[0]].empty();
+        empty_var = (*domaines)[test[0]].empty();
     }
     if (empty_var){
         // cerr << "Probleme non realisable" << endl;
@@ -653,16 +656,16 @@ bool Arbre_dom::arc_consistence(int var){
 
 bool Arbre_dom::forward_checking(int const var_instanciee) {
     bool has_removed = false;
-    for (int i = 0; i < contraintes_par_var[var_instanciee].size(); i++) {
-        int contraintei = contraintes_par_var[var_instanciee][i];
-        int var1 = contraintes[contraintei].var1;
-        int var2 = contraintes[contraintei].var2;
+    for (int i = 0; i < (*contraintes_par_var)[var_instanciee].size(); i++) {
+        int contraintei = (*contraintes_par_var)[var_instanciee][i];
+        int var1 = (*contraintes)[contraintei].var1;
+        int var2 = (*contraintes)[contraintei].var2;
         int other_var = var1 == var_instanciee ? var2 : var1;
         vector<int> to_be_removed {};
-        for (int j = 0; j < (domaines_ends[other_var] - domaines[other_var].begin()); j++) {
-            int val1 = var1 == var_instanciee ? val_instanciation[var_instanciee] : domaines[other_var][j];
-            int val2 = var1 == var_instanciee ? domaines[other_var][j] : val_instanciation[var_instanciee];
-            if (not contraintes[contraintei].satisfaite(val1, val2)) {
+        for (int j = 0; j < (domaines_ends[other_var] - (*domaines)[other_var].begin()); j++) {
+            int val1 = var1 == var_instanciee ? val_instanciation[var_instanciee] : (*domaines)[other_var][j];
+            int val2 = var1 == var_instanciee ? (*domaines)[other_var][j] : val_instanciation[var_instanciee];
+            if (not (*contraintes)[contraintei].satisfaite(val1, val2)) {
                 // Do not remove immediatly to avoid errors during domain loop
                 to_be_removed.push_back(j);
             }
@@ -671,7 +674,7 @@ bool Arbre_dom::forward_checking(int const var_instanciee) {
             has_removed = true;
         }
         for (int index = to_be_removed.size() - 1; index >= 0; index--) {
-            iter_swap(domaines_ends[other_var] - 1, domaines[other_var].begin() + to_be_removed[index]);
+            iter_swap(domaines_ends[other_var] - 1, (*domaines)[other_var].begin() + to_be_removed[index]);
             domaines_ends[other_var]--;
         }
     }
