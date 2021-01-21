@@ -1,5 +1,8 @@
 #include <iostream>
 #include <cctype>
+#include <unistd.h>
+#include <ios>
+#include <fstream>
 #include "csp.h"
 #include "coloration.h"
 #include "arbre_dom.h"
@@ -7,35 +10,24 @@
 
 using namespace std;
 
+void get_ram_usage(long& ram_usage, unsigned long& swap_usage) {
+    long rss;
+    unsigned long vsize;
+    ifstream proc_stat("/proc/self/stat", ios_base::in);
+    string pid, comm, state, ppid, pgrp, session, tty_nr;
+    string tpgid, flags, minflt, cminflt, majflt, cmajflt;
+    string utime, stime, cutime, cstime, priority, nice;
+    string O, itrealvalue, starttime;
+
+    proc_stat >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
+            >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
+            >> utime >> stime >> cutime >> cstime >> priority >> nice
+            >> O >> itrealvalue >> starttime >> vsize >> rss;
+    ram_usage = rss * sysconf(_SC_PAGE_SIZE) / 1024;
+    swap_usage = vsize / 1024.0;
+}
+
 int main(){
-
-    vector<vector<int>> weights;
-    vector<int> values;
-    vector<int> Wmax;
-
-    knapsack_problems(8,values,weights,Wmax);
-
-    vector<int> sol = solve_max_knapsack(values,weights,Wmax);
-
-    for (int s=0 ;s < sol.size();s++){
-        if (s == sol.size() -1){
-            cout << "Solution : " << value_criteria(sol[s],values);
-        }
-        else{
-            cout << sol[s] << endl;
-        }
-
-    }
-    cout << endl;
-
-//    cout << "Min number of colorations : " << solve_mincol("../thib.col", 10) + 1 << endl;
-//    cout << "Min number of colorations : " << solve_mincol("../fpsol2.i.2.col", 40) << endl;
-//
-//    Reine r = Reine(8);
-//    r.solve(bt_heuristic_var::smallest_domain, bt_heuristic_val::smallest, true, look_ahead::maintain_arc_consistency);
-//    r.display_tree_size();
-//    r.display_solution();
-
-
+    solve_mincol("../col/fpsol2.i.2.col");
     return 0;
 }
