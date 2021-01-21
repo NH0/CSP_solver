@@ -15,7 +15,7 @@ list_of_graphs = {"gen_complete" : nx.complete_graph,
                   "gen_internet" : nx.random_internet_as_graph}
 
 def graph_to_col(g, name):
-    with open("./col/" + name + "_" + N + ".col", 'w') as f:
+    with open("./col/gen_" + name + "_" + str(N) + ".col", 'w') as f:
         f.write("c Automatically generated file\n")
         f.write("c FILE: " + name + ".col\n")
         f.write("p edge "+ str(g.number_of_nodes()) + " " + str(g.number_of_edges()) + "\n")
@@ -28,17 +28,20 @@ def generate_col(name, n = N):
     g = list_of_graphs[name](n)
     graph_to_col(g, name)
 
-for k,v in list_of_graphs.items():
-    generate_col(k)
+# for k,v in list_of_graphs.items():
+#     generate_col(k)
 
-g1 = nx.fast_gnp_random_graph(N, 0.85)
-graph_to_col(g1, "gen_erdos")
+# g1 = nx.fast_gnp_random_graph(N, 0.85)
+# graph_to_col(g1, "gen_erdos")
 
-g2 = nx.newman_watts_strogatz_graph(N, 5, 0.6)
-graph_to_col(g2, "gen_small_world")
+# g2 = nx.newman_watts_strogatz_graph(N, 5, 0.6)
+# graph_to_col(g2, "gen_small_world")
 
-g3 = nx.barabasi_albert_graph(N, 5)
-graph_to_col(g3, "gen_barbasi")
+# g3 = nx.barabasi_albert_graph(N, 5)
+# graph_to_col(g3, "gen_barbasi")
 
-g4 = nx.karate_club_graph()
-graph_to_col(g4, "gen_karate_club")
+# g4 = nx.karate_club_graph()
+# graph_to_col(g4, "gen_karate_club")
+
+g5 = nx.binomial_tree(10)
+graph_to_col(g5, "binomial")
