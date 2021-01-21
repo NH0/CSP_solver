@@ -214,9 +214,36 @@ void interface(){
             cout << "Entrez le nom du fichier décrivant le probleme que vous voulez résoudre (il doit etre dans le repertoire du .exe)" << endl;
             string fichier;
             cin >> fichier;
-            int n = reponse_entier("Entrez une borne superieure pour le probleme de coloration.");
-            int sol = solve_mincol(fichier,n);
-            cout << "Le nombre chromatique du graphe est " << to_string(sol) << endl;
+            if (reponse_oui_non("Avez vous une bonne borne superieure du problème ?")){
+                int n = reponse_entier("Entrez cette borne.");
+                if (reponse_oui_non("Voulez-vous définir les heuristiques de choix ?")){
+                    bt_heuristic_val hval = get_heuristic_val();
+                    bt_heuristic_var hvar = get_heuristic_var();
+                    look_ahead look = get_look_ahead();
+                    bool b = reponse_oui_non("Voulez-vous vérifier si votre problème est arc-consistant avant de démarrer la résolution ?");
+                    int sol = solve_mincol(fichier,n,hvar,hval,b,look);
+                    cout << "Le nombre chromatique du graphe est " << to_string(sol) << endl;
+                }
+                else{
+                    int sol = solve_mincol(fichier,n);
+                    cout << "Le nombre chromatique du graphe est " << to_string(sol) << endl;
+                }
+
+            }
+            else{
+                if (reponse_oui_non("Voulez-vous définir les heuristiques de choix ?")){
+                    bt_heuristic_val hval = get_heuristic_val();
+                    bt_heuristic_var hvar = get_heuristic_var();
+                    look_ahead look = get_look_ahead();
+                    bool b = reponse_oui_non("Voulez-vous vérifier si votre problème est arc-consistant avant de démarrer la résolution ?");
+                    int sol = solve_mincol(fichier,hvar,hval,b,look);
+                    cout << "Le nombre chromatique du graphe est " << to_string(sol) << endl;
+                }
+                else{
+                    int sol = solve_mincol(fichier);
+                    cout << "Le nombre chromatique du graphe est " << to_string(sol) << endl;
+                }
+            }
         }
         else if (reponse_oui_non("Voulez-vous resoudre le probleme des reines ?")){
             int nb_reines = reponse_entier("Combien de reines ?");

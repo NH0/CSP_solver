@@ -106,12 +106,31 @@ vector<int> solve_max_knapsack(std::vector<int> v,std::vector<vector<int>> w, st
     vector<int> sol;
 
     while (not knapsack->domaines[knapsack->nb_var-1].empty()) {
-        //sol = knapsack->solve(bt_heuristic_var::varlargest, bt_heuristic_val::vallargest, false, look_ahead::forward_checking);
-        sol = knapsack->solve(bt_heuristic_var::largest_domain, bt_heuristic_val::largest, false, look_ahead::forward_checking);
+        sol = knapsack->solve(bt_heuristic_var::largest_domain, bt_heuristic_val::random, false, look_ahead::forward_checking);
         B_inf = knapsack->get_value_solution(sol);
         knapsack = new Knapsack(knapsack,B_inf+knapsack->dt);
     }
 
+    return sol;
+}
+
+vector<int> solve_max_knapsack(std::vector<int> v,std::vector<vector<int>> w, std::vector<int> Wmax,bt_heuristic_var hvar, bt_heuristic_val hval, look_ahead look){
+    int B_inf = calcul_glouton_knapsack(v,w,Wmax);
+
+    Knapsack* knapsack = new Knapsack(v,w,Wmax,B_inf);
+    vector<int> sol;
+
+    int cpt = 0;
+
+    while (not knapsack->domaines[knapsack->nb_var-1].empty()) {
+        cpt += 1;
+        sol = knapsack->solve(hvar, hval, false, look);
+        knapsack->display_tree_size();
+        B_inf = knapsack->get_value_solution(sol);
+        knapsack = new Knapsack(knapsack,B_inf+knapsack->dt);
+    }
+
+    cout << "Nb d'iterations " << cpt << endl;
     return sol;
 }
 
