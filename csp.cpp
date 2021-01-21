@@ -14,7 +14,8 @@ std::vector<int> CSP::solve(bt_heuristic_var var_heuristic, bt_heuristic_val val
         cout << "Solve time : " << chrono::duration_cast<chrono::milliseconds>(stop - start).count() << " ms" << endl;
         return arbre->get_solution();
     }
-    cout << "No solution" << endl;
+    auto stop = chrono::high_resolution_clock::now();
+    cout << "No solution, time : " << chrono::duration_cast<chrono::milliseconds>(stop - start).count() << " ms" << endl;
     return {};
 }
 
@@ -75,7 +76,6 @@ Reine::Reine(int n){
     }
     domaines.shrink_to_fit();
     contraintes.shrink_to_fit();
-    cout << contraintes.capacity() << endl;
     for (auto &contr :contraintes_par_var) {
         contr.shrink_to_fit();
     }
