@@ -215,7 +215,7 @@ void interface(){
             string fichier;
             cin >> fichier;
             int n = reponse_entier("Entrez une borne superieure pour le probleme de coloration.");
-            int sol = solve_mincol(fichier,n);
+            int sol = solve_mincol(fichier);
             cout << "Le nombre chromatique du graphe est " << to_string(sol) << endl;
         }
         else if (reponse_oui_non("Voulez-vous resoudre le probleme des reines ?")){
