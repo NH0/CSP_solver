@@ -183,7 +183,8 @@ int solve_mincol(string const filename,  bt_heuristic_var hvar, bt_heuristic_val
     vector<int> sol = col->solve(hvar, hval);
     while (sol.empty()) {
         delete col;
-        k += 20;
+        k += 40;
+        clog << "Trying with " << k << endl;
         Coloration* col = new Coloration(filename, k);
         sol = col->solve(hvar, hval);
     }

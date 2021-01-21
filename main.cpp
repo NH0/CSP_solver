@@ -28,6 +28,9 @@ void get_ram_usage(long& ram_usage, unsigned long& swap_usage) {
 }
 
 int main(){
-    solve_mincol("../col/fpsol2.i.2.col");
+    Coloration* col = new Coloration("../col/gen_barbasi.col", 20);
+    col->solve(bt_heuristic_var::linked_to_previous_var, bt_heuristic_val::smallest, true, look_ahead::forward_checking);
+    col->display_tree_size();
+    delete col;
     return 0;
 }
