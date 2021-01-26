@@ -7,6 +7,7 @@
 #include "coloration.h"
 #include "arbre_dom.h"
 #include "build_in_problems.h"
+#include "interface.h"
 
 using namespace std;
 
@@ -28,6 +29,6 @@ void get_ram_usage(long& ram_usage, unsigned long& swap_usage) {
 }
 
 int main(){
-    solve_mincol("../col/fpsol2.i.2.col");
+    interface();
     return 0;
 }
